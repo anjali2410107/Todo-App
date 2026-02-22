@@ -2,7 +2,8 @@ class TodoModel {
   final String id;
   final String title;
   final bool isCompleted;
-   TodoModel(
+   TodoModel
+       (
   {
     required this.id,
     required this.title,
