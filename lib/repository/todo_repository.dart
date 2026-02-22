@@ -15,7 +15,15 @@ class TodoRepository {
   }
   Future<void> deleteTodo(String id)async
   {
-    await box.put(todo.id, todo.toMap());
+    await box.delete(id);
   }
-
+Future<void> toggleTodo(TodoModel todo)async
+{
+  final updated=TodoModel(
+      id: todo.id,
+      title: todo.title,
+  isCompleted: !todo.isCompleted,
+  );
+  await box.put(todo.id,updated.toMap());
+}
 }
