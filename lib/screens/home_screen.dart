@@ -52,6 +52,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Todo App"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Padding(padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Expanded(child: TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  hintText: "Enter Todo",
+                border: OutlineInputBorder()
+                ),
+
+              ))
+            ],
+          ),
+          )
+        ],
+      ),
+
+    );
   }
 }
