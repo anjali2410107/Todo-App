@@ -13,6 +13,6 @@ class LoadTodos extends TodoEvent{}
  }
   class ToggleTodo extends TodoEvent
   {
-    final TodoEvent todo;
+    final TodoModel todo;
     ToggleTodo(this.todo);
   }
