@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:todoappp/main.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/repository/todo_repository.dart';
-
+import 'package:uuid/uuid.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -13,10 +12,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TodoRepository repository = TodoRepository();
   final TextEditingController controller = TextEditingController();
-  final uuid = const Uuid();
+  final Uuid uuid =  Uuid();
 
   List<TodoModel> todos = [];
-
+  @override
   void initState()
   {
     super.initState();
@@ -31,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     void addTodo() async
     {
       if(controller.text.isEmpty) return;
-      final todo=TodoModel(id: uuuid.v4(),
+      final todo=TodoModel(id: uuid.v4(),
           title: controller.text,);
       await repository.addTodo(todo);
       controller.clear();
@@ -46,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     void toggleTodo(TodoModel todo)async
     {
-      await repository.toString(todo);
+      await repository.toggleTodo(todo);
       loadTodos();
     }
 
@@ -68,10 +67,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   hintText: "Enter Todo",
                 border: OutlineInputBorder()
                 ),
-
-              ))
+              ),
+              ),
+              const SizedBox(width: 10,),
+              ElevatedButton(onPressed: addTodo, child: const Text("Add"),
+              )
             ],
           ),
+          ),
+          Expanded(child:
+          ListView.builder(
+          itemCount: todos.length,
+          itemBuilder: (context,index)
+    {
+      final todo=todos[index];
+      return ListTile(
+    leading: Checkbox(value: todo.isCompleted,
+    onChanged: (_) =>toggleTodo(todo),
+    ),
+    title: Text(todo.title,
+    style: TextStyle(
+    decoration: todo.isCompleted? TextDecoration.lineThrough:
+    TextDecoration.none,
+    ),),
+    trailing: IconButton(onPressed: () =>deleteTodo(todo.id),
+    icon: const Icon(Icons.delete),
+    ),
+
+    );
+
+    },
+    ),
           )
         ],
       ),
