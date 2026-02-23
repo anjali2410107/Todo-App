@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todoappp/model/todo_model.dart';
-import 'package:todoappp/repository/todo_repository.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,7 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       leading: Checkbox
                         (value: todo.isCompleted,
                         onChanged: (_) {
-                          context:
                           context.read<TodoBloc>().add(ToggleTodo(todo),
                           );
                         },),

@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:todoappp/model/todo_model.dart';
+ import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:uuid/uuid.dart';
 
