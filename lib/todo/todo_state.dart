@@ -1,6 +1,11 @@
 part of 'todo_bloc.dart';
 
-@immutable
-sealed class TodoState {}
+abstract class TodoState {}
 
-final class TodoInitial extends TodoState {}
+class TodoLoded extends TodoState{}
+
+class TodoLoaded extends TodoState
+{
+  final List<TodoModel> todos;
+  TodoLoaded(this.todos);
+}
