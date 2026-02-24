@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoappp/enum.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 
@@ -14,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController controller = TextEditingController();
 TaskPriority selectedPriority=TaskPriority.medium;
 DateTime? selectedDueDate=null;
+TaskFilter selectedFilter=TaskFilter.all;
   @override
   void initState() {
     super.initState();
@@ -134,6 +136,27 @@ DateTime? selectedDueDate=null;
               ],
             ),
           ),
+          SizedBox(height: 50,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: TaskFilter.values.map((filter)
+            {
+              final isSelected =selectedFilter==filter;
+              return Padding(padding:
+              const EdgeInsets.symmetric(horizontal: 6),
+              child: ChoiceChip(
+                  label: Text(filter.name.toUpperCase()),
+                  selected: isSelected,
+              onSelected:(_)
+                  {
+                    setState(() {
+                      selectedFilter=filter;
+                    });
+                  },
+              ),
+              );
+            }).toList(),
+          ),),
           Expanded(child:
           BlocBuilder<TodoBloc, TodoState>(
             builder: (context, state) {
