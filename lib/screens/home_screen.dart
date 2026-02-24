@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 
@@ -14,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController controller = TextEditingController();
 TaskPriority selectedPriority=TaskPriority.medium;
-DateTime? selectedDueDate;
+DateTime? selectedDueDate=null;
   @override
   void initState() {
     super.initState();
@@ -151,11 +150,22 @@ DateTime? selectedDueDate;
                                 .lineThrough :
                             TextDecoration.none,
                           ),),
-                        subtitle: Text(todo.priority.name.toUpperCase(),
-                        style: TextStyle(
-                          color: getPriorityColor(todo.priority),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              todo.priority.name.toUpperCase(),
+                            style: TextStyle(
+                              color: getPriorityColor(todo.priority),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            ),
+                            if(todo.dueDate!=null)
+                              Text(
+                                "Due: ${todo.dueDate!.toLocal().toString().split(' ')[0]}",
+                                style: const TextStyle(color: Colors.blue),
+                              )
+                          ],
                         ),
                         trailing: IconButton(onPressed: () {
                           context.read<TodoBloc>().add(DeleteTodo(todo.id));
