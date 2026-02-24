@@ -77,8 +77,11 @@ DateTime? selectedDueDate=null;
                     Row(
                       children: [
                         Expanded(child: Text(
-                          selectedDueDate==null?"No Due Date":
-                              "Due: ${selectedDueDate!.toLocal().toString().split(' ')[0]}",
+                          selectedDueDate==null?
+                          "No Due Date":
+                          "Due: ${selectedDueDate!.day}/${selectedDueDate!.month}/${selectedDueDate!.year}"
+                              "${selectedDueDate!.hour.toString().padLeft(2,'0')}:"
+                              "${selectedDueDate!.minute.toString().padLeft(2,'0')}"
                         ),),
                         IconButton(
                             onPressed: () async
