@@ -1,13 +1,23 @@
+
+enum TaskPriority
+{
+  high,
+  medium,
+  low
+}
 class TodoModel {
   final String id;
   final String title;
   final bool isCompleted;
+  final TaskPriority priority;
+
    TodoModel
        (
   {
     required this.id,
     required this.title,
     this.isCompleted=false,
+    this.priority=TaskPriority.medium,
 });
 Map<String,dynamic> toMap()
 {
@@ -15,6 +25,7 @@ Map<String,dynamic> toMap()
     'id':id,
     'title':title,
     'isCompleted':isCompleted,
+    'priority':priority.name,
   };
 }
 factory TodoModel.fromMap(Map<String,dynamic> map)
@@ -23,6 +34,9 @@ factory TodoModel.fromMap(Map<String,dynamic> map)
         id: map['id'],
         title: map['title'],
     isCompleted: map['isCompleted']?? false,
+      priority: TaskPriority.values.firstWhere((e)
+        => e.name==map['priority'],orElse: ()=>TaskPriority.medium,
+      ),
     );
   }
 }
