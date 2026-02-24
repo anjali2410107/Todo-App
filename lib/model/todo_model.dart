@@ -40,7 +40,7 @@ factory TodoModel.fromMap(Map<String,dynamic> map)
       priority: TaskPriority.values.firstWhere((e)
         => e.name==map['priority'],orElse: ()=>TaskPriority.medium,
       ),
-      dueDate: map['dueDate'] !=null?DateTime.parse(map['dueDtae']):null,
+      dueDate: map['dueDate'] !=null?DateTime.parse(map['dueDate']):null,
     );
   }
 }

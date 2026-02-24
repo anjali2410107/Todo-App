@@ -13,9 +13,10 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   TodoBloc(this.repository):super(TodoInitial())
   {
     on<LoadTodos>((event,emit)
-    {
+    {  print("LoadTodos triggered");
       final todos =repository.getTodos();
-      emit(TodoLoaded(todos));
+    print("Todos fetched: ${todos.length}");
+    emit(TodoLoaded(todos));
     });
     on<AddTodo>((event,emit)async
     {
