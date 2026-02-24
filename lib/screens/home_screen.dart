@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController controller = TextEditingController();
+TaskPriority selectedPriority=TaskPriority.medium;
 
   @override
   void initState() {
@@ -30,19 +32,42 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Expanded(child: TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                      hintText: "Enter Todo",
-                      border: OutlineInputBorder()
-                  ),
+                Expanded(child: Column(
+                  children: [
+                    TextField(
+                      controller: controller,
+                      decoration: const InputDecoration(
+                          hintText: "Enter Todo",
+                          border: OutlineInputBorder()
+                      ),
+                    ),
+                    const SizedBox(height: 8,),
+                    DropdownButton<TaskPriority>
+                      (
+                        value: selectedPriority,
+                        isExpanded: true,
+                        items: TaskPriority.values.map((priority)
+                        {
+                          return DropdownMenuItem(
+                              value: priority,
+                              child:Text(priority.name.toUpperCase()),
+                          );
+                        }
+                        ).toList(),
+                        onChanged: (value)
+                    {
+                      setState(() {
+                        selectedPriority=value!;
+                      });
+                    })
+                  ],
                 ),
                 ),
                 const SizedBox(width: 10,),
                 ElevatedButton(onPressed: () {
                   if (controller.text.isNotEmpty) {
                     context.read<TodoBloc>().add(
-                      AddTodo(controller.text),
+                      AddTodo(controller.text,selectedPriority),
                     );
                     controller.clear();
                   }
