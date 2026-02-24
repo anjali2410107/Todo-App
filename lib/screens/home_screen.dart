@@ -108,7 +108,7 @@ DateTime? selectedDueDate=null;
     pickedTime.minute,
     );
     setState(() {
-    selectedDueDate=picked;
+    selectedDueDate=combinedDataTime;
     });
     }
     }
@@ -179,8 +179,11 @@ DateTime? selectedDueDate=null;
                             ),
                             if(todo.dueDate!=null)
                               Text(
-                                "Due: ${todo.dueDate!.toLocal().toString().split(' ')[0]}",
-                                style: const TextStyle(color: Colors.blue),
+                                    "Due: "
+                                        "${todo.dueDate!.day}/${todo.dueDate!.month}/${todo.dueDate!.year} "
+                                        "${todo.dueDate!.hour.toString().padLeft(2, '0')}:"
+                                        "${todo.dueDate!.minute.toString().padLeft(2, '0')}",
+                                    style: const TextStyle(color: Colors.blue),
                               )
                           ],
                         ),
