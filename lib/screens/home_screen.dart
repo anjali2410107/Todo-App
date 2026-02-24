@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController controller = TextEditingController();
 TaskPriority selectedPriority=TaskPriority.medium;
-
+DateTime? selectedDueDate;
   @override
   void initState() {
     super.initState();
@@ -73,7 +73,34 @@ TaskPriority selectedPriority=TaskPriority.medium;
                       setState(() {
                         selectedPriority=value!;
                       });
-                    })
+                    }),
+                    const SizedBox(height: 5,),
+                    Row(
+                      children: [
+                        Expanded(child: Text(
+                          selectedDueDate==null?"No Due Date":
+                              "Due: ${selectedDueDate!.toLocal().toString().split(' ')[0]}",
+                        ),),
+                        IconButton(
+                            onPressed: () async
+                          {
+                            final picked=await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2100),
+                            );
+                            if(picked!=null)
+                              {
+                                setState(() {
+                                  selectedDueDate=picked;
+                                });
+                              }
+                          },
+                            icon: const Icon(Icons.calendar_today),
+                        )
+                      ],
+                    )
                   ],
                 ),
                 ),
@@ -81,7 +108,7 @@ TaskPriority selectedPriority=TaskPriority.medium;
                 ElevatedButton(onPressed: () {
                   if (controller.text.isNotEmpty) {
                     context.read<TodoBloc>().add(
-                      AddTodo(controller.text,selectedPriority),
+                      AddTodo(controller.text,selectedPriority,selectedDueDate),
                     );
                     controller.clear();
                   }
