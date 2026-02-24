@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 
@@ -20,6 +21,19 @@ TaskPriority selectedPriority=TaskPriority.medium;
     context.read<TodoBloc>().add(LoadTodos());
   }
 
+  Color getPriorityColor(TaskPriority priority)
+  {
+    switch(priority)
+        {
+      case TaskPriority.high:
+        return Colors.red;
+      case TaskPriority.medium:
+        return Colors.orangeAccent;
+        case TaskPriority.low:
+      return Colors.green;
+
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,24 +99,42 @@ TaskPriority selectedPriority=TaskPriority.medium;
                   itemCount: state.todos.length,
                   itemBuilder: (context, index) {
                     final todo = state.todos[index];
-                    return ListTile(
-                      leading: Checkbox
-                        (value: todo.isCompleted,
-                        onChanged: (_) {
-                          context.read<TodoBloc>().add(ToggleTodo(todo),
-                          );
-                        },),
-                      title:
-                      Text(todo.title,
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4,horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: getPriorityColor(todo.priority),
+                            width: 6,
+                          )
+                        )
+                      ),
+                      child: ListTile(
+                        leading: Checkbox
+                          (value: todo.isCompleted,
+                          onChanged: (_) {
+                            context.read<TodoBloc>().add(ToggleTodo(todo),
+                            );
+                          },),
+                        title:
+                        Text(
+                          todo.title,
+                          style: TextStyle(
+                            decoration: todo.isCompleted ? TextDecoration
+                                .lineThrough :
+                            TextDecoration.none,
+                          ),),
+                        subtitle: Text(todo.priority.name.toUpperCase(),
                         style: TextStyle(
-                          decoration: todo.isCompleted ? TextDecoration
-                              .lineThrough :
-                          TextDecoration.none,
-                        ),),
-                      trailing: IconButton(onPressed: () {
-                        context.read<TodoBloc>().add(DeleteTodo(todo.id));
-                      },
-                        icon: const Icon(Icons.delete),
+                          color: getPriorityColor(todo.priority),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        ),
+                        trailing: IconButton(onPressed: () {
+                          context.read<TodoBloc>().add(DeleteTodo(todo.id));
+                        },
+                          icon: const Icon(Icons.delete),
+                        ),
                       ),
                     );
                   },
