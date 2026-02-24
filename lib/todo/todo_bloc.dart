@@ -22,7 +22,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       final todo=TodoModel(
           id: uuid.v4(),
           title: event.title,
-          priority: event.priority
+          priority: event.priority,
+          dueDate: event.dueDate
       );
       await repository.addTodo(todo);
       emit(TodoLoaded(repository.getTodos()));
