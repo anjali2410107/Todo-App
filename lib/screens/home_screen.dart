@@ -82,20 +82,34 @@ DateTime? selectedDueDate=null;
                         ),),
                         IconButton(
                             onPressed: () async
-                          {
-                            final picked=await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2100),
-                            );
-                            if(picked!=null)
-                              {
-                                setState(() {
-                                  selectedDueDate=picked;
-                                });
-                              }
-                          },
+    {
+    final picked=await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime.now(),
+    lastDate: DateTime(2100),
+    );
+    if(picked!=null)
+    {
+    final pickedTime=await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    );
+    if(pickedTime!=null)
+    {
+    final combinedDataTime=DateTime(
+    picked.year,
+    picked.month,
+    picked.day,
+    pickedTime.hour,
+    pickedTime.minute,
+    );
+    setState(() {
+    selectedDueDate=picked;
+    });
+    }
+    }
+    },
                             icon: const Icon(Icons.calendar_today),
                         )
                       ],
