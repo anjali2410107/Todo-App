@@ -16,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
 TaskPriority selectedPriority=TaskPriority.medium;
 DateTime? selectedDueDate=null;
 TaskFilter selectedFilter=TaskFilter.all;
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +35,53 @@ TaskFilter selectedFilter=TaskFilter.all;
       return Colors.green;
 
     }
+  }
+  List<TodoModel> applyFilterAndSort(List<TodoModel> todos)
+  {
+    final now =DateTime.now();
+     List<TodoModel> filtered=todos.where((todo)
+     {
+       switch(selectedFilter)
+           {
+         case TaskFilter.overdue:
+           return todo.dueDate!=null&&
+       !todo.isCompleted&&todo.dueDate!.isBefore(now);
+         case TaskFilter.completed:
+           return todo.isCompleted;
+         case TaskFilter.highPriority:
+           return todo.priority==TaskPriority.high;
+         case TaskFilter.all:
+           default:
+             return true;
+       }
+     }).toList();
+     filtered.sort((a,b)
+     {
+       if(a.isCompleted&&!b.isCompleted)
+         return 1;
+       if(!a.isCompleted&&b.isCompleted)
+         return -1;
+       bool aOverdue=a.dueDate!=null
+           && !a.isCompleted &&
+           a.dueDate!.isBefore(now);
+       bool bOverdue=b.dueDate!=null
+           && !b.isCompleted &&
+           b.dueDate!.isBefore(now);
+
+       if(aOverdue&&!bOverdue) return -1;
+       if(!aOverdue&& bOverdue) return 1;
+       if(a.dueDate!=null&&!bOverdue!=null) {
+         int dateCompare = a.dueDate!.compareTo(b.dueDate!);
+         if (dateCompare != 0) return dateCompare;
+       }
+       if(a.dueDate!=null)
+         {
+           return -1;
+         }
+       if(b.dueDate!=null) return 1;
+       return a.priority.index.compareTo(b.priority.index);
+     });
+ return filtered;
   }
   @override
   Widget build(BuildContext context) {
@@ -161,10 +209,11 @@ TaskFilter selectedFilter=TaskFilter.all;
           BlocBuilder<TodoBloc, TodoState>(
             builder: (context, state) {
               if (state is TodoLoaded) {
+                final filteredTodos=applyFilterAndSort(state.todos);
                 return ListView.builder(
-                  itemCount: state.todos.length,
+                  itemCount: filteredTodos.length,
                   itemBuilder: (context, index) {
-                    final todo = state.todos[index];
+                    final todo = filteredTodos[index];
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 4,horizontal: 8),
                       decoration: BoxDecoration(
