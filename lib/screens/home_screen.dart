@@ -33,8 +33,7 @@ TaskFilter selectedFilter=TaskFilter.all;
         return Colors.orangeAccent;
         case TaskPriority.low:
       return Colors.green;
-
-    }
+        }
   }
   List<TodoModel> applyFilterAndSort(List<TodoModel> todos)
   {
@@ -67,13 +66,11 @@ TaskFilter selectedFilter=TaskFilter.all;
        bool bOverdue=b.dueDate!=null
            && !b.isCompleted &&
            b.dueDate!.isBefore(now);
-
        if(aOverdue&&!bOverdue) return -1;
        if(!aOverdue&& bOverdue) return 1;
        if(a.dueDate!=null&&!bOverdue!=null) {
          int dateCompare = a.dueDate!.compareTo(b.dueDate!);
-         if (dateCompare != 0) return dateCompare;
-       }
+         if (dateCompare != 0) return dateCompare;}
        if(a.dueDate!=null)
          {
            return -1;
@@ -87,7 +84,7 @@ TaskFilter selectedFilter=TaskFilter.all;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Todo App"),
+        title: const Text("Todo App and Reminder System"),
         centerTitle: true,
       ),
       body: Column(
@@ -100,7 +97,7 @@ TaskFilter selectedFilter=TaskFilter.all;
                     TextField(
                       controller: controller,
                       decoration: const InputDecoration(
-                          hintText: "Enter Todo",
+                          hintText: "Enter Todo Task",
                           border: OutlineInputBorder()
                       ),
                     ),
