@@ -84,7 +84,7 @@ TaskFilter selectedFilter=TaskFilter.all;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Todo App and Reminder System"),
+        title: const Text("Todo App"),
         centerTitle: true,
       ),
       body: Column(
