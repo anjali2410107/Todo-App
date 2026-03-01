@@ -26,15 +26,19 @@ TaskFilter selectedFilter=TaskFilter.all;
   {
     final TextEditingController editingController=
     TextEditingController(text: todo.title);
+
     TaskPriority editPriority=todo.priority;
+
     DateTime?editDueDate=todo.dueDate;
+
     showDialog(context: context,
-        builder: (context)
+        builder: (dialogContext)
     {
       return AlertDialog(
         title: const Text('Edit Todo'),
-        content: StatefulBuilder(builder:
-        (context,setStateDialog)
+        content: StatefulBuilder
+          (builder:
+        (innerContext,setStateDialog)
         {
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -71,17 +75,38 @@ children: [
   ),
   TextButton(onPressed: () async
       {
-        final picked=await showDatePicker(context: context,
-            initialDate: editDueDate??DateTime.now(),
-            firstDate: DateTime.now(),
+        final picked=await showDatePicker
+          (
+          context: context,
+          useRootNavigator: true,
+          initialDate: editDueDate??DateTime.now(),
+            firstDate: DateTime(2000),
             lastDate: DateTime(2100),
         );
         if(picked!=null)
           {
-            setStateDialog(()
-            {
-              editDueDate=picked;
-            });
+           final pickedTime=await showTimePicker
+             (
+           context: context,
+             useRootNavigator: true,
+             initialTime: editDueDate!=null
+          ? TimeOfDay.fromDateTime(editDueDate!)
+          :TimeOfDay.now(),
+            );
+           if(pickedTime!=null)
+             {
+               setStateDialog(()
+               {
+                 editDueDate=DateTime(
+                   picked.year,
+                   picked.month,
+                   picked.day,
+                   pickedTime.hour,
+                   pickedTime.minute,
+                 );
+               }
+               );
+             }
           }
       },
       child: const Text("Changed Due Date"),
@@ -161,7 +186,7 @@ children: [
            b.dueDate!.isBefore(now);
        if(aOverdue&&!bOverdue) return -1;
        if(!aOverdue&& bOverdue) return 1;
-       if(a.dueDate!=null&&!bOverdue!=null) {
+       if(a.dueDate!=null&& bOverdue!=null) {
          int dateCompare = a.dueDate!.compareTo(b.dueDate!);
          if (dateCompare != 0) return dateCompare;}
        if(a.dueDate!=null)
