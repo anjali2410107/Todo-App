@@ -22,6 +22,99 @@ TaskFilter selectedFilter=TaskFilter.all;
     super.initState();
     context.read<TodoBloc>().add(LoadTodos());
   }
+  void _showEditDialog(TodoModel todo)
+  {
+    final TextEditingController editingController=
+    TextEditingController(text: todo.title);
+    TaskPriority editPriority=todo.priority;
+    DateTime?editDueDate=todo.dueDate;
+    showDialog(context: context,
+        builder: (context)
+    {
+      return AlertDialog(
+        title: const Text('Edit Todo'),
+        content: StatefulBuilder(builder:
+        (context,setStateDialog)
+        {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+children: [
+  TextField(
+    controller: editingController,
+    decoration: const InputDecoration(
+      border: OutlineInputBorder(),
+    ),
+  ),
+  const SizedBox(height: 10,),
+  DropdownButton<TaskPriority>
+    (
+    value: editPriority,
+    isExpanded: true,
+    items:TaskPriority.values.map((priority){
+      return DropdownMenuItem(
+        value: priority,
+        child: Text(priority.name.toUpperCase()),
+      );
+    }).toList(),
+    onChanged: (value)
+    {
+      setStateDialog(()
+      {
+        editPriority=value!;
+      });
+    },
+  ),
+  const SizedBox(height: 10,
+  ),
+  Text(editDueDate==null?"No Due Date":
+  "Due:${editDueDate!.day}/${editDueDate!.month}/${editDueDate!.year}",
+  ),
+  TextButton(onPressed: () async
+      {
+        final picked=await showDatePicker(context: context,
+            initialDate: editDueDate??DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100),
+        );
+        if(picked!=null)
+          {
+            setStateDialog(()
+            {
+              editDueDate=picked;
+            });
+          }
+      },
+      child: const Text("Changed Due Date"),
+  ),
+],
+          );
+        },
+        ),
+        actions: [
+          TextButton(onPressed: ()
+              {
+               Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+          ),
+          ElevatedButton(onPressed: () {
+            final updateTodo = TodoModel(id: todo.id,
+              title: editingController.text,
+              isCompleted: todo.isCompleted,
+              priority: editPriority,
+              dueDate: editDueDate,
+            );
+            context.read<TodoBloc>().add(
+                UpdateTodoEvent(updatedTodo:updateTodo),);
+            Navigator.pop(context);
+          },
+                child: const Text("Save"),
+          ),
+              ],
+              );
+
+    },);
+  }
 
   Color getPriorityColor(TaskPriority priority)
   {
@@ -222,6 +315,10 @@ TaskFilter selectedFilter=TaskFilter.all;
                         )
                       ),
                       child: ListTile(
+                        onTap: ()
+                        {
+                          _showEditDialog(todo);
+                        },
                         leading: Checkbox
                           (value: todo.isCompleted,
                           onChanged: (_) {

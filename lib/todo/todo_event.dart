@@ -19,11 +19,9 @@ class LoadTodos extends TodoEvent{}
     ToggleTodo(this.todo);
   }
   class UpdateTodoEvent extends TodoEvent{
-  final int index;
   final TodoModel updatedTodo;
 
   UpdateTodoEvent({
-    required this.index,
     required this.updatedTodo,
   });
   }
