@@ -3,7 +3,8 @@ import 'package:todoappp/model/todo_model.dart';
 class TodoRepository {
   final Box box=Hive.box('todos');
 
-  List<TodoModel> getTodos() {
+  List<TodoModel> getTodos()
+  {
     final data = box.values.toList();
     return data
         .map((e) => TodoModel.fromMap(Map<String, dynamic>.from(e)))
@@ -27,5 +28,9 @@ Future<void> toggleTodo(TodoModel todo)async
     dueDate: todo.dueDate,
   );
   await box.put(todo.id,updated.toMap());
+}
+Future<void> updateTodo(TodoModel updatedTodo) async
+{
+  await box.put(updatedTodo.id, updatedTodo.toMap());
 }
 }
