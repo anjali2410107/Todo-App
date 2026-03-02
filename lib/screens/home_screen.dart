@@ -186,7 +186,7 @@ children: [
            b.dueDate!.isBefore(now);
        if(aOverdue&&!bOverdue) return -1;
        if(!aOverdue&& bOverdue) return 1;
-       if(a.dueDate!=null&& bOverdue!=null) {
+       if(a.dueDate!=null&& b.dueDate!=null) {
          int dateCompare = a.dueDate!.compareTo(b.dueDate!);
          if (dateCompare != 0) return dateCompare;}
        if(a.dueDate!=null)
