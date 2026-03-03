@@ -47,8 +47,7 @@ children: [
     controller: editingController,
     decoration: const InputDecoration(
       border: OutlineInputBorder(),
-    ),
-  ),
+    ),),
   const SizedBox(height: 10,),
   DropdownButton<TaskPriority>
     (
@@ -65,9 +64,7 @@ children: [
       setStateDialog(()
       {
         editPriority=value!;
-      });
-    },
-  ),
+      });},),
   const SizedBox(height: 10,
   ),
   Text(editDueDate==null?"No Due Date":
@@ -103,18 +100,9 @@ children: [
                    picked.day,
                    pickedTime.hour,
                    pickedTime.minute,
-                 );
-               }
-               );
-             }
-          }
-      },
+                 );});}}},
       child: const Text("Changed Due Date"),
-  ),
-],
-          );
-        },
-        ),
+  ),],);},),
         actions: [
           TextButton(onPressed: ()
               {
@@ -134,13 +122,7 @@ children: [
             Navigator.pop(context);
           },
                 child: const Text("Save"),
-          ),
-              ],
-              );
-
-    },);
-  }
-
+          ),],);},);}
   Color getPriorityColor(TaskPriority priority)
   {
     switch(priority)
@@ -151,8 +133,7 @@ children: [
         return Colors.orangeAccent;
         case TaskPriority.low:
       return Colors.green;
-        }
-  }
+        }}
   List<TodoModel> applyFilterAndSort(List<TodoModel> todos)
   {
     final now =DateTime.now();
@@ -170,8 +151,7 @@ children: [
          case TaskFilter.all:
            default:
              return true;
-       }
-     }).toList();
+       }}).toList();
      filtered.sort((a,b)
      {
        if(a.isCompleted&&!b.isCompleted)
@@ -217,8 +197,7 @@ children: [
                       decoration: const InputDecoration(
                           hintText: "Enter Todo Task",
                           border: OutlineInputBorder()
-                      ),
-                    ),
+                      ),),
                     const SizedBox(height: 8,),
                     DropdownButton<TaskPriority>
                       (
@@ -229,9 +208,7 @@ children: [
                           return DropdownMenuItem(
                               value: priority,
                               child:Text(priority.name.toUpperCase()),
-                          );
-                        }
-                        ).toList(),
+                          );}).toList(),
                         onChanged: (value)
                     {
                       setState(() {
@@ -274,17 +251,9 @@ children: [
     );
     setState(() {
     selectedDueDate=combinedDataTime;
-    });
-    }
-    }
-    },
+    });}}},
                             icon: const Icon(Icons.calendar_today),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                ),
+                        )],)],),),
                 const SizedBox(width: 10,),
                 ElevatedButton(onPressed: () {
                   if (controller.text.isNotEmpty) {
@@ -292,13 +261,9 @@ children: [
                       AddTodo(controller.text,selectedPriority,selectedDueDate),
                     );
                     controller.clear();
-                  }
-                },
+                  }},
                   child: const Text("Add"),
-                )
-              ],
-            ),
-          ),
+                )],),),
           SizedBox(height: 50,
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -314,12 +279,8 @@ children: [
                   {
                     setState(() {
                       selectedFilter=filter;
-                    });
-                  },
-              ),
-              );
-            }).toList(),
-          ),),
+                    });},),);
+            }).toList(),),),
           Expanded(child:
           BlocBuilder<TodoBloc, TodoState>(
             builder: (context, state) {
@@ -336,9 +297,7 @@ children: [
                           left: BorderSide(
                             color: getPriorityColor(todo.priority),
                             width: 6,
-                          )
-                        )
-                      ),
+                          ))),
                       child: ListTile(
                         onTap: ()
                         {
@@ -348,8 +307,7 @@ children: [
                           (value: todo.isCompleted,
                           onChanged: (_) {
                             context.read<TodoBloc>().add(ToggleTodo(todo),
-                            );
-                          },),
+                            );},),
                         title:
                         Text(
                           todo.title,
@@ -375,26 +333,11 @@ children: [
                                         "${todo.dueDate!.hour.toString().padLeft(2, '0')}:"
                                         "${todo.dueDate!.minute.toString().padLeft(2, '0')}",
                                     style: const TextStyle(color: Colors.blue),
-                              )
-                          ],
-                        ),
+                              )],),
                         trailing: IconButton(onPressed: () {
                           context.read<TodoBloc>().add(DeleteTodo(todo.id));
                         },
                           icon: const Icon(Icons.delete),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }
+                        ),),);},);}
               return const Center(child: CircularProgressIndicator());
-            },
-          ),
-          )
-        ],
-      ),
-
-    );
-  }
-}
+            },),)],),);}}

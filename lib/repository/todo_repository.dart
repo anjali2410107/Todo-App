@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:todoappp/model/todo_model.dart';
 class TodoRepository {
-  final Box<Map> box=Hive.box<Map>('todos');
+  final Box box=Hive.box('todos');
 
   List<TodoModel> getTodos()
   {
