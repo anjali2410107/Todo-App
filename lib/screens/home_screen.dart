@@ -187,7 +187,7 @@ children: [
       ),
       body: Column(
         children: [
-          Padding(padding: const EdgeInsets.all(12),
+          Padding(padding: const EdgeInsets.all(11),
             child: Row(
               children: [
                 Expanded(child: Column(
@@ -198,7 +198,7 @@ children: [
                           hintText: "Enter Todo Task",
                           border: OutlineInputBorder()
                       ),),
-                    const SizedBox(height: 8,),
+                    const SizedBox(height: 5,),
                     DropdownButton<TaskPriority>
                       (
                         value: selectedPriority,
@@ -225,6 +225,15 @@ children: [
                               "${selectedDueDate!.hour.toString().padLeft(2,'0')}:"
                               "${selectedDueDate!.minute.toString().padLeft(2,'0')}"
                         ),),
+                        if(selectedDueDate!=null)
+                            IconButton(icon: const Icon(Icons.close,color: Colors.red,),
+                            onPressed: ()
+                              {
+                                setState(() {
+                                  selectedDueDate=null;
+                                });
+                              },
+                            ),
                         IconButton(
                             onPressed: () async
     {
