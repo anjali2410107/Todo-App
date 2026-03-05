@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoappp/core/services/notification_service.dart';
 import 'package:todoappp/enum.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
@@ -289,7 +290,8 @@ children: [
                     setState(() {
                       selectedFilter=filter;
                     });},),);
-            }).toList(),),),
+            }).toList(),),
+          ),
           Expanded(child:
           BlocBuilder<TodoBloc, TodoState>(
             builder: (context, state) {
