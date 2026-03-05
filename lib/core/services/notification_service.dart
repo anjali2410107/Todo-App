@@ -7,7 +7,7 @@ class NotificationService{
 
   static Future<void> init() async{
     tz_data.initializeTimeZones();
-
+tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
     const androidSettings=AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
@@ -15,6 +15,10 @@ class NotificationService{
       android: androidSettings,
     );
     await _notifications.initialize(settings: settings);
+    await _notifications
+    .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>()
+    ?.requestNotificationsPermission();
   }
   static int _generateId(String taskId,int minutesBefore)
   {
