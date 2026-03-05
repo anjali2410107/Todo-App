@@ -24,6 +24,21 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   {
     return taskId.hashCode+minutesBefore;
   }
+  static Future<void> testNotification() async {
+    await _notifications.show(
+      id: 999,
+      title: "Test Notification",
+      body: "If you see this, notifications work!",
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'test_channel',
+          'Test Notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  }
   static Future<void> scheduleTaskReminders({
     required String taskId,
     required String title,
@@ -34,6 +49,7 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
       const Duration(hours: 24),
       const Duration(hours: 1),
       const Duration(minutes: 2),
+      const Duration(minutes: 0),
     ];
 
     for(final duration in reminderDurations)
@@ -44,10 +60,11 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
         await _notifications.zonedSchedule(
           id:_generateId(taskId,duration.inMinutes),
           title:title,
-          body:
-          "Task due in ${duration.inHours>0?
-          "${duration.inHours} hour(s)"
-              :"${duration.inMinutes} minutes"}",
+          body: duration.inMinutes == 0
+              ? "Task is due now!"
+              : "Task due in ${duration.inHours > 0
+              ? "${duration.inHours} hour(s)"
+              : "${duration.inMinutes} minutes"}",
           scheduledDate: tz.TZDateTime.from(reminderTime, tz.local),
           notificationDetails:   const NotificationDetails(
             android:  AndroidNotificationDetails

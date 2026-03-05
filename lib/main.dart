@@ -10,7 +10,8 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('todos');
 await NotificationService.init();
-final repository=TodoRepository();
+  await NotificationService.testNotification();
+  final repository=TodoRepository();
   runApp(BlocProvider(create: (_) => TodoBloc(repository),
   child: const MyApp(),
   ));
