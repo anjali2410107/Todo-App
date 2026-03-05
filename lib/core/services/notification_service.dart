@@ -29,7 +29,7 @@ class NotificationService{
     final reminderDurations=[
       const Duration(hours: 24),
       const Duration(hours: 1),
-      const Duration(minutes: 10),
+      const Duration(minutes: 2),
     ];
 
     for(final duration in reminderDurations)
