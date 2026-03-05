@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
  import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:uuid/uuid.dart';
-
+import 'package:todoappp/core/services/notification_service.dart';
 part 'todo_event.dart';
 part 'todo_state.dart';
 
@@ -12,10 +12,21 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
 
   TodoBloc(this.repository):super(TodoInitial())
   {
-    on<LoadTodos>((event,emit)
+    on<LoadTodos>((event,emit) async
     {  print("LoadTodos triggered");
       final todos =repository.getTodos();
     print("Todos fetched: ${todos.length}");
+    for(final todo in todos)
+      {
+        if(todo.dueDate!=null)
+          {
+            await NotificationService.scheduleTaskReminders(
+                taskId: todo.id,
+                title: todo.title,
+                dueDate: todo.dueDate!
+            );
+          }
+      }
     emit(TodoLoaded(todos));
     });
     on<AddTodo>((event,emit)async
@@ -27,6 +38,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
           dueDate: event.dueDate
       );
       await repository.addTodo(todo);
+      if(todo.dueDate!=null)
+        {
+      await NotificationService.scheduleTaskReminders(
+        taskId: todo.id,
+        title: todo.title,
+        dueDate: todo.dueDate!,
+      );}
       emit(TodoLoaded(repository.getTodos()));
     });
 

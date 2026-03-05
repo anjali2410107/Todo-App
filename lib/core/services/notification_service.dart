@@ -55,9 +55,15 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
     for(final duration in reminderDurations)
     {
       final reminderTime=dueDate.subtract(duration);
-      if(reminderTime.isAfter(now))
-      {
-        await _notifications.zonedSchedule(
+      print("NOW: $now");
+      print("Checking reminder: $duration at $reminderTime");
+      if(reminderTime.isBefore(now))
+        {
+          print("Skipping reminder because time already passed");
+          continue;
+        }
+        print("Scheduling notification at $reminderTime");
+          await _notifications.zonedSchedule(
           id:_generateId(taskId,duration.inMinutes),
           title:title,
           body: duration.inMinutes == 0
@@ -72,17 +78,33 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
               channelDescription: 'Task reminder notifications',
               importance: Importance.max,
               priority: Priority.high,
-            ),
+              category: AndroidNotificationCategory.reminder,
+              visibility: NotificationVisibility.public,
+              ticker: 'ticker',),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
 
         );
-      }
     }
+    print("Scheduling immediate debug notification for testing");
+    await _notifications.show(
+      id: 9999,
+      title: "Debug: Notifications Work!",
+      body: "If you see this, scheduling is working ✅",
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'debug_channel',
+          'Debug Notifications',
+          channelDescription: 'Immediate test notification',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+    );
   }
   static Future<void> cancelTaskReminders(String taskId) async
   {
-    final offsets=[1440,60,10];
+    final offsets=[1440,60,2,0];
     for(final minutes in offsets)
     {
       await _notifications.cancel(
