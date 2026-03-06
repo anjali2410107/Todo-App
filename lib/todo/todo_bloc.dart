@@ -64,7 +64,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         );
     on<UpdateTodoEvent>((event,emit) async
     {
+      await NotificationService.cancelTaskReminders(event.updatedTodo.id);
      await repository.updateTodo(event.updatedTodo);
+     await NotificationService.scheduleTaskReminders(
+         taskId: event.updatedTodo.id,
+         title: event.updatedTodo.title,
+         dueDate: event.updatedTodo.dueDate!,
+     );
      emit(TodoLoaded(repository.getTodos()));
     });
   }
