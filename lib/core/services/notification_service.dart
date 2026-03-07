@@ -24,7 +24,6 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   {
     return taskId.hashCode+minutesBefore;
   }
-
   static Future<void> scheduleTaskReminders({
     required String taskId,
     required String title,
@@ -32,12 +31,9 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   }) async{
     final now=DateTime.now();
     final reminderDurations=[
-      const Duration(hours: 24),
-      const Duration(hours: 1),
-      const Duration(minutes: 2),
+      const Duration(minutes: 30),
       const Duration(minutes: 0),
     ];
-
     for(final duration in reminderDurations)
     {
       final reminderTime=dueDate.subtract(duration);
@@ -69,10 +65,7 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
               ticker: 'ticker',),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
-        );
-    }
-  }
+          );}}
   static Future<void> cancelTaskReminders(String taskId) async
   {
     final offsets=[1440,60,2,0];
@@ -80,6 +73,4 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
     {
       await _notifications.cancel(
         id:   _generateId(taskId,minutes));
-    }
-  }
-}
+    }}}
