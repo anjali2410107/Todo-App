@@ -11,7 +11,7 @@ class TodoModel {
   final bool isCompleted;
   final TaskPriority priority;
   final DateTime? dueDate;
-
+  final DateTime? startDate;
    TodoModel
        (
   {
@@ -20,6 +20,7 @@ class TodoModel {
     this.isCompleted=false,
     this.priority=TaskPriority.medium,
     this.dueDate,
+    this.startDate,
 });
 Map<String,dynamic> toMap()
 {
@@ -29,6 +30,7 @@ Map<String,dynamic> toMap()
     'isCompleted':isCompleted,
     'priority':priority.name,
     'dueDate':dueDate?.toIso8601String(),
+    'startDate':startDate?.toIso8601String(),
   };
 }
 factory TodoModel.fromMap(Map<String,dynamic> map)
@@ -41,6 +43,7 @@ factory TodoModel.fromMap(Map<String,dynamic> map)
         => e.name==map['priority'],orElse: ()=>TaskPriority.medium,
       ),
       dueDate: map['dueDate'] !=null?DateTime.parse(map['dueDate']):null,
+      startDate: map['startDate']!=null?DateTime.parse(map['startDate']):null,
     );
   }
 }
