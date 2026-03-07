@@ -68,9 +68,40 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
           );}}
   static Future<void> cancelTaskReminders(String taskId) async
   {
-    final offsets=[1440,60,2,0];
+    final offsets=[30,0];
     for(final minutes in offsets)
     {
       await _notifications.cancel(
         id:   _generateId(taskId,minutes));
-    }}}
+    }}
+static Future<void> scheduleStartReminder
+    ({
+    required String taskId,
+  required String title,
+  required DateTime startDate,
+}) async
+{
+  final now =DateTime.now();
+  if(startDate.isBefore(now))
+    {
+      return;
+    }
+  await _notifications.zonedSchedule(
+      id: taskId.hashCode+5000,
+      title: title,
+      body: "Time to start: $title",
+      scheduledDate: tz.TZDateTime.from(startDate, tz.local),
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'start_channel',
+            'Task Start Reminders',
+        channelDescription: 'Reminder to start a task',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  );
+}
+
+}
