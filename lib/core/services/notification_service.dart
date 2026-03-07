@@ -24,21 +24,7 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   {
     return taskId.hashCode+minutesBefore;
   }
-  static Future<void> testNotification() async {
-    await _notifications.show(
-      id: 999,
-      title: "Test Notification",
-      body: "If you see this, notifications work!",
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'test_channel',
-          'Test Notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-    );
-  }
+
   static Future<void> scheduleTaskReminders({
     required String taskId,
     required String title,
@@ -86,21 +72,6 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
 
         );
     }
-    print("Scheduling immediate debug notification for testing");
-    await _notifications.show(
-      id: 9999,
-      title: "Debug: Notifications Work!",
-      body: "If you see this, scheduling is working ✅",
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'debug_channel',
-          'Debug Notifications',
-          channelDescription: 'Immediate test notification',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-    );
   }
   static Future<void> cancelTaskReminders(String taskId) async
   {
