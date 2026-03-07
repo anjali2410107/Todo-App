@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 TaskPriority selectedPriority=TaskPriority.medium;
 DateTime? selectedDueDate=null;
 TaskFilter selectedFilter=TaskFilter.all;
-
+DateTime? selectedStartDate;
   @override
   void initState() {
     super.initState();
@@ -265,14 +265,65 @@ children: [
     selectedDueDate=combinedDataTime;
     });}}},
                             icon: const Icon(Icons.calendar_today),
-                        )],)],),),
+                        )],),
+                  const  SizedBox(height: 5,),
+                    Row(
+                      children: [
+                        Expanded(child: Text(
+                            selectedStartDate==null
+                                ? "No Start Date":
+                            "Start: ${selectedStartDate!.day}/${selectedStartDate!.month}/${selectedStartDate!.year} "
+                                "${selectedStartDate!.hour.toString().padLeft(2,'0')}:"
+                                "${selectedStartDate!.minute.toString().padLeft(2,'0')}"
+                        ),),
+                        if(selectedStartDate!=null)
+                          IconButton(icon: const Icon(Icons.close,color: Colors.red,),
+                            onPressed: ()
+                            {
+                              setState(() {
+                                selectedStartDate=null;
+                              });
+                            },
+                          ),
+                        IconButton(
+                          onPressed: () async
+                          {
+                            final picked=await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2100),
+                            );
+                            if(picked!=null)
+                            {
+                              final pickedTime=await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if(pickedTime!=null)
+                              {
+                                final combinedDataTime=DateTime(
+                                  picked.year,
+                                  picked.month,
+                                  picked.day,
+                                  pickedTime.hour,
+                                  pickedTime.minute,
+                                );
+                                setState(() {
+                                  selectedStartDate=combinedDataTime;
+                                });}}},
+                          icon: const Icon(Icons.calendar_today),
+                        )],),
+                  ],),),
                 const SizedBox(width: 10,),
                 ElevatedButton(onPressed: () {
                   if (controller.text.isNotEmpty) {
                     context.read<TodoBloc>().add(
-                      AddTodo(controller.text,selectedPriority,selectedDueDate,null),
+                      AddTodo(controller.text,selectedPriority,selectedDueDate,selectedStartDate),
                     );
                     controller.clear();
+                    selectedStartDate=null;
+                    selectedDueDate=null;
                   }},
                   child: const Text("Add"),
                 )],),),
@@ -350,8 +401,8 @@ children: [
                           if(todo.startDate!=null)
                               Text(
                                 "Start: "
-                                    "${todo.startDate!.day}/${todo.startDate!.month}/${todo.startDate!.year}"
-                                    "${todo.startDate!.hour.toString().padLeft(2,'0')}"
+                                    "${todo.startDate!.day}/${todo.startDate!.month}/${todo.startDate!.year} "
+                                    "${todo.startDate!.hour.toString().padLeft(2,'0')}:"
                                     "${todo.startDate!.minute.toString().padLeft(2,'0')}",
                                 style: const TextStyle(color: Colors.green),
                               )
