@@ -7,7 +7,8 @@ class LoadTodos extends TodoEvent{}
    final String title;
    final TaskPriority priority;
    final DateTime? dueDate;
-   AddTodo(this.title,this.priority,this.dueDate);
+   final DateTime? startDate;
+   AddTodo(this.title,this.priority,this.dueDate,this.startDate);
  }
  class DeleteTodo extends TodoEvent{
   final String id;

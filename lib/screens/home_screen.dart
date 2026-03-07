@@ -112,11 +112,13 @@ children: [
               child: const Text("Cancel"),
           ),
           ElevatedButton(onPressed: () {
-            final updateTodo = TodoModel(id: todo.id,
+            final updateTodo = TodoModel(
+              id: todo.id,
               title: editingController.text,
               isCompleted: todo.isCompleted,
               priority: editPriority,
               dueDate: editDueDate,
+           startDate: todo.startDate,
             );
             context.read<TodoBloc>().add(
                 UpdateTodoEvent(updatedTodo:updateTodo),);
@@ -222,7 +224,7 @@ children: [
                         Expanded(child: Text(
                           selectedDueDate==null?
                           "No Due Date":
-                          "Due: ${selectedDueDate!.day}/${selectedDueDate!.month}/${selectedDueDate!.year}"
+                          "Due: ${selectedDueDate!.day}/${selectedDueDate!.month}/${selectedDueDate!.year} "
                               "${selectedDueDate!.hour.toString().padLeft(2,'0')}:"
                               "${selectedDueDate!.minute.toString().padLeft(2,'0')}"
                         ),),
@@ -268,7 +270,7 @@ children: [
                 ElevatedButton(onPressed: () {
                   if (controller.text.isNotEmpty) {
                     context.read<TodoBloc>().add(
-                      AddTodo(controller.text,selectedPriority,selectedDueDate),
+                      AddTodo(controller.text,selectedPriority,selectedDueDate,null),
                     );
                     controller.clear();
                   }},
@@ -344,7 +346,16 @@ children: [
                                         "${todo.dueDate!.hour.toString().padLeft(2, '0')}:"
                                         "${todo.dueDate!.minute.toString().padLeft(2, '0')}",
                                     style: const TextStyle(color: Colors.blue),
-                              )],),
+                              ),
+                          if(todo.startDate!=null)
+                              Text(
+                                "Start: "
+                                    "${todo.startDate!.day}/${todo.startDate!.month}/${todo.startDate!.year}"
+                                    "${todo.startDate!.hour.toString().padLeft(2,'0')}"
+                                    "${todo.startDate!.minute.toString().padLeft(2,'0')}",
+                                style: const TextStyle(color: Colors.green),
+                              )
+                          ],),
                         trailing: IconButton(onPressed: () {
                           context.read<TodoBloc>().add(DeleteTodo(todo.id));
                         },

@@ -26,6 +26,14 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
                 dueDate: todo.dueDate!
             );
           }
+        if(todo.startDate!=null)
+          {
+            await NotificationService.scheduleStartReminder(
+                taskId: todo.id,
+                title: todo.title,
+                startDate: todo.startDate!
+            );
+          }
       }
     emit(TodoLoaded(todos));
     });
@@ -35,7 +43,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
           id: uuid.v4(),
           title: event.title,
           priority: event.priority,
-          dueDate: event.dueDate
+          dueDate: event.dueDate,
+     startDate: event.startDate,
       );
       await repository.addTodo(todo);
       if(todo.dueDate!=null)
@@ -45,6 +54,14 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         title: todo.title,
         dueDate: todo.dueDate!,
       );}
+      if(todo.startDate!=null)
+        {
+          await NotificationService.scheduleStartReminder(
+              taskId: todo.id,
+              title: todo.title,
+              startDate: todo.startDate!
+          );
+        }
       emit(TodoLoaded(repository.getTodos()));
     });
 
@@ -66,16 +83,20 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     {
       await NotificationService.cancelTaskReminders(event.updatedTodo.id);
      await repository.updateTodo(event.updatedTodo);
+     if(event.updatedTodo.dueDate!=null)
+       {
      await NotificationService.scheduleTaskReminders(
          taskId: event.updatedTodo.id,
          title: event.updatedTodo.title,
          dueDate: event.updatedTodo.dueDate!,
-     );
-     await NotificationService.scheduleStartReminder(
+     );}
+     if(event.updatedTodo.startDate!=null)
+{    await NotificationService.scheduleStartReminder(
          taskId: event.updatedTodo.id,
          title: event.updatedTodo.title,
          startDate: event.updatedTodo.startDate!,
-     );
+     );}
+
      emit(TodoLoaded(repository.getTodos()));
     });
   }

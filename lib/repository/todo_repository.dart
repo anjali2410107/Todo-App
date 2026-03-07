@@ -26,6 +26,7 @@ Future<void> toggleTodo(TodoModel todo)async
   isCompleted: !todo.isCompleted,
     priority: todo.priority,
     dueDate: todo.dueDate,
+    startDate: todo.startDate,
   );
   await box.put(todo.id,updated.toMap());
 }
