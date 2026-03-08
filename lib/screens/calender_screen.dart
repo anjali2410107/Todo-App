@@ -34,7 +34,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         .toList();
   }
 
-  // Returns true if a date has any tasks (for dot markers)
   bool _hasEvents(List<TodoModel> todos, DateTime day) {
     return todos.any((t) =>
     (t.startDate != null && _isSameDate(t.startDate!, day)) ||

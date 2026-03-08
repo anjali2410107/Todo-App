@@ -18,3 +18,11 @@ class SessionRecord {
     required this.skippedBreak,
   });
 }
+
+class FocusScreen extends StatefulWidget {
+  const FocusScreen({super.key});
+
+  @override
+  State<FocusScreen> createState() => _FocusScreenState();
+}
+
