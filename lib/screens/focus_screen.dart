@@ -249,38 +249,55 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   Widget _buildSetupCard() {
+    final hours = _sessionMinutes ~/ 60;
+    final minutes = _sessionMinutes % 60;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Session Duration',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            Slider(
-              value: _sessionMinutes.toDouble(),
-              min: 5,
-              max: 120,
-              divisions: 23,
-              label: '$_sessionMinutes min',
-              activeColor: _phaseColor,
-              onChanged: (v) => _onSessionChanged(v.round()),
-            ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Session: $_sessionMinutes min',
-                    style: const TextStyle(fontSize: 13)),
-                Row(
-                  children: [
-                    Icon(Icons.coffee, size: 15, color: Colors.teal),
-                    const SizedBox(width: 4),
-                    Text('Break: $_breakMinutes min',
-                        style:
-                        const TextStyle(fontSize: 13, color: Colors.teal)),
-                  ],
+                _buildTimeUnit(
+                  label: 'HH',
+                  value: hours,
+                  onIncrement: () => _onSessionChanged(_sessionMinutes + 60),
+                  onDecrement: () {
+                    if (_sessionMinutes - 60 >= 5)
+                      _onSessionChanged(_sessionMinutes - 60);
+                  },
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(':', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                ),
+                _buildTimeUnit(
+                  label: 'MM',
+                  value: minutes,
+                  onIncrement: () => _onSessionChanged(_sessionMinutes + 5),
+                  onDecrement: () {
+                    if (_sessionMinutes - 5 >= 5)
+                      _onSessionChanged(_sessionMinutes - 5);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.coffee, size: 16, color: Colors.teal),
+                const SizedBox(width: 6),
+                Text(
+                  'Auto break: $_breakMinutes min',
+                  style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -290,6 +307,32 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
+  Widget _buildTimeUnit({
+    required String label,
+    required int value,
+    required VoidCallback onIncrement,
+    required VoidCallback onDecrement,
+  }) {
+    return Column(
+      children: [
+        IconButton(
+          onPressed: onIncrement,
+          icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 32),
+          color: Colors.deepPurple,
+        ),
+        Text(
+          value.toString().padLeft(2, '0'),
+          style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold),
+        ),
+        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+        IconButton(
+          onPressed: onDecrement,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
+          color: Colors.deepPurple,
+        ),
+      ],
+    );
+  }
   Widget _buildControls() {
     if (_phase == FocusPhase.idle || _phase == FocusPhase.finished) {
       return ElevatedButton.icon(

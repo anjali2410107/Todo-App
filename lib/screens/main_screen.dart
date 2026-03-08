@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todoappp/screens/calender_screen.dart';
+import 'package:todoappp/screens/focus_screen.dart';
 import 'package:todoappp/screens/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     CalendarScreen(),
+    FocusScreen(),
   ];
 
   @override
@@ -22,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
@@ -32,6 +35,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer),
+            label: 'Focus',
           ),
         ],
       ),
