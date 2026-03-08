@@ -12,8 +12,11 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  DateTime _selectedDay = DateTime.now();
-  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );  DateTime _focusedDay = DateTime.now();
 
   bool _isSameDate(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -159,7 +162,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 selectedDayPredicate: (day) => _isSameDate(day, _selectedDay),
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
-                    _selectedDay = selectedDay;
+                    _selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
                     _focusedDay = focusedDay;
                   });
                 },
