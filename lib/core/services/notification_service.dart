@@ -4,6 +4,31 @@ import 'package:timezone/data/latest.dart' as tz_data;
 class NotificationService{
   static final FlutterLocalNotificationsPlugin _notifications=
   FlutterLocalNotificationsPlugin();
+  static Future<void> showImmediateNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'focus_channel',
+        'Focus Timer',
+        channelDescription: 'Focus session and break alerts',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+      ),
+    );
+    await _notifications.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+    );  }
+
+
+
 
   static Future<void> init() async{
     tz_data.initializeTimeZones();
