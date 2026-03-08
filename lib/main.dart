@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todoappp/repository/todo_repository.dart';
+import 'package:todoappp/screens/main_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 import 'screens/home_screen.dart';
 import 'core/services/notification_service.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
      debugShowCheckedModeBanner: false,
-home: const HomeScreen(),
+home: const MainScreen(),
     );
   }}
 
