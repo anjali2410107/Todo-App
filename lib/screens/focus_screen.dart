@@ -380,3 +380,38 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 }
 
+class _CircleTimerPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _CircleTimerPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 10;
+
+    final bgPaint = Paint()
+      ..color = color.withOpacity(0.12)
+      ..strokeWidth = 12
+      ..style = PaintingStyle.stroke;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final fgPaint = Paint()
+      ..color = color
+      ..strokeWidth = 12
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      2 * pi * progress,
+      false,
+      fgPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CircleTimerPainter old) =>
+      old.progress != progress || old.color != color;
+}
