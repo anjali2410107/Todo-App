@@ -18,5 +18,23 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   @override
-
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.checklist),
+            label: 'Tasks',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
+          ),
+        ],
+      ),
+    );
+  }
 }
