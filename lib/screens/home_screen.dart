@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todoappp/core/services/notification_service.dart';
 import 'package:todoappp/enum.dart';
 import 'package:todoappp/model/todo_model.dart';
+import 'package:todoappp/screens/stats_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -187,8 +188,19 @@ children: [
       appBar: AppBar(
         title: const Text("Todo App"),
         centerTitle: true,
-      ),
-      body: Column(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StatsScreen()),
+              );
+            },
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Statistics',
+          ),
+        ],
+      ),      body: Column(
         children: [
           Padding(padding: const EdgeInsets.all(11),
             child: Row(
