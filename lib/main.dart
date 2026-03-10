@@ -4,10 +4,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:todoappp/screens/main_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
+import 'core/services/focus_background_service.dart';
 import 'screens/home_screen.dart';
 import 'core/services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeBackgroundService();
   await Hive.initFlutter();
   await Hive.openBox('todos');
 await NotificationService.init();
