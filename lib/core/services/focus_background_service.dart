@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,6 +12,7 @@ const String _kPhaseKey      = 'focus_phase';
 const String _kSessionMinsKey = 'focus_session_mins';
 const String _kBreakMinsKey   = 'focus_break_mins';
 Future<void> initializeBackgroundService() async {
+  if (!Platform.isAndroid && !Platform.isIOS) return;
   final service = FlutterBackgroundService();
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     _kChannelId,
@@ -113,6 +115,7 @@ class FocusTimerService {
     required int    sessionMins,
     required int    breakMins,
   }) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     final prefs   = await SharedPreferences.getInstance();
     final endTime = DateTime.now().add(Duration(seconds: durationSeconds));
     await prefs.setInt(_kEndTimeKey, endTime.millisecondsSinceEpoch);
@@ -124,6 +127,7 @@ class FocusTimerService {
     if (!running) await _service.startService();
   }
   static Future<void> stopTimer() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     _service.invoke('stopService');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kEndTimeKey);
@@ -153,8 +157,10 @@ class FocusTimerService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_kBreakMinsKey);
   }
-  static Stream<Map<String, dynamic>?> get timerStream =>
-      _service.on('timerUpdate');
+  static Stream<Map<String, dynamic>?> get timerStream {
+    if (!Platform.isAndroid && !Platform.isIOS) return const Stream.empty();
+    return _service.on('timerUpdate');
+  }
   static Future<void> scheduleIosEndNotification({
     required int    durationSeconds,
     required String phase,
