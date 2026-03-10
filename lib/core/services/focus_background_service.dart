@@ -97,12 +97,14 @@ void onServiceStart(ServiceInstance service) async {
     final mm = (remaining ~/ 60).toString().padLeft(2, '0');
     final ss = (remaining % 60).toString().padLeft(2, '0');
     final label = phase == 'focusing' ? '🎯 Focusing' : '☕ Break';
+
     if (service is AndroidServiceInstance) {
       service.setForegroundNotificationInfo(
         title: '$label — $mm:$ss remaining',
         content: 'Tap to return to the app',
       );
     }
+
     service.invoke('timerUpdate', {'secondsLeft': remaining, 'phase': phase});
   });
 }
