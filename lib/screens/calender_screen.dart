@@ -45,8 +45,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return todos.any((t) => t.dueDate != null && _isSameDate(t.dueDate!, day));
   }
 
-  Color _getPriorityColor(TaskPriority priority) {
-    switch (priority) {
+  Color _getPriorityColor(TaskPriority priority)
+  {
+    switch (priority)
+    {
       case TaskPriority.high:
         return const Color(0xFFEF4444);
       case TaskPriority.medium:
