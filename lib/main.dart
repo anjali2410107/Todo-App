@@ -5,7 +5,6 @@ import 'package:todoappp/repository/todo_repository.dart';
 import 'package:todoappp/screens/main_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 import 'core/services/focus_background_service.dart';
-import 'screens/home_screen.dart';
 import 'core/services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
