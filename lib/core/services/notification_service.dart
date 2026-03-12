@@ -99,6 +99,9 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
       await _notifications.cancel(
         id:   _generateId(taskId,minutes));
     }}
+  static Future<void> cancelStartReminder(String taskId) async {
+    await _notifications.cancel(id:taskId.hashCode + 5000);
+  }
 static Future<void> scheduleStartReminder
     ({
     required String taskId,

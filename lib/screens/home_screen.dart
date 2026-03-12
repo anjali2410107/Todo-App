@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextField(
                       controller: editingController,
                       decoration: InputDecoration(
-                        hintText: 'Task title..',
+                        hintText: 'Task title',
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         border: OutlineInputBorder(
