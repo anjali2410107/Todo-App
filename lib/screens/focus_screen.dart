@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:todoappp/core/services/focus_background_service.dart';
 import 'package:todoappp/core/services/notification_service.dart';
 
 enum FocusPhase { idle, focusing, onBreak, finished }
@@ -20,6 +21,16 @@ class SessionChunk {
     this.isCompleted = false,
     this.isActive = false,
   });
+
+  Map<String, dynamic> toMap() => {
+    'isFocus': isFocus,
+    'minutes': minutes,
+  };
+
+  factory SessionChunk.fromMap(Map<String, dynamic> map) => SessionChunk(
+    isFocus: map['isFocus'] as bool,
+    minutes: map['minutes'] as int,
+  );
 }
 
 class SessionRecord {
@@ -71,7 +82,7 @@ class FocusScreen extends StatefulWidget {
 }
 
 class _FocusScreenState extends State<FocusScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   int _sessionMinutes = 52;
   int _breakMinutes = 17;
 
@@ -79,6 +90,8 @@ class _FocusScreenState extends State<FocusScreen>
   int _secondsLeft = 0;
   int _totalSeconds = 0;
   Timer? _uiTimer;
+  StreamSubscription? _bgTimerSub;
+  StreamSubscription? _bgChunkSub;
 
   List<SessionChunk> _chunks = [];
   int _currentChunkIndex = 0;
@@ -94,6 +107,7 @@ class _FocusScreenState extends State<FocusScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadHistory();
     _pickQuote();
     _buildChunks();
@@ -105,6 +119,79 @@ class _FocusScreenState extends State<FocusScreen>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _listenToBackgroundService();
+    _restoreTimerState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _restoreTimerState();
+    } else if (state == AppLifecycleState.paused) {
+      _uiTimer?.cancel();
+    }
+  }
+
+  void _listenToBackgroundService() {
+    _bgTimerSub = FocusTimerService.timerStream.listen((data) {
+      if (data == null || !mounted) return;
+      final secs = data['secondsLeft'] as int?;
+      if (secs != null) setState(() => _secondsLeft = secs);
+    });
+
+    _bgChunkSub = FocusTimerService.chunkChangedStream.listen((data) {
+      if (data == null || !mounted) return;
+      final newChunkIndex = data['currentChunkIndex'] as int?;
+      final newPhase = data['phase'] as String?;
+      final secondsLeft = data['secondsLeft'] as int?;
+
+      if (newChunkIndex != null &&
+          newChunkIndex < _chunks.length &&
+          newPhase != null &&
+          secondsLeft != null) {
+        setState(() {
+          _chunks[_currentChunkIndex].isCompleted = true;
+          _chunks[_currentChunkIndex].isActive = false;
+          _currentChunkIndex = newChunkIndex;
+          _chunks[_currentChunkIndex].isActive = true;
+          _phase = newPhase == 'focusing' ? FocusPhase.focusing : FocusPhase.onBreak;
+          _secondsLeft = secondsLeft;
+          _totalSeconds = secondsLeft;
+        });
+        _startUiTimer();
+      }
+    });
+  }
+
+  Future<void> _restoreTimerState() async {
+    final remaining = await FocusTimerService.getRemainingSeconds();
+    final phase = await FocusTimerService.getSavedPhase();
+    final savedChunks = await FocusTimerService.getSavedChunks();
+    final savedChunkIndex = await FocusTimerService.getSavedChunkIndex();
+
+    if (remaining == null || phase == null || phase == 'idle') return;
+
+    if (savedChunks != null && savedChunkIndex != null) {
+      final restoredChunks = savedChunks.map((c) => SessionChunk.fromMap(c)).toList();
+
+      for (int i = 0; i < savedChunkIndex; i++) {
+        restoredChunks[i].isCompleted = true;
+      }
+      if (savedChunkIndex < restoredChunks.length) {
+        restoredChunks[savedChunkIndex].isActive = true;
+      }
+
+      setState(() {
+        _chunks = restoredChunks;
+        _currentChunkIndex = savedChunkIndex;
+        _phase = phase == 'focusing' ? FocusPhase.focusing : FocusPhase.onBreak;
+        _secondsLeft = remaining;
+        _totalSeconds = restoredChunks[savedChunkIndex].minutes * 60;
+      });
+
+      _startUiTimer();
+    }
   }
 
   List<SessionChunk> _calculateChunks(int totalMins) {
@@ -129,9 +216,7 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 45 ? 45 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) {
-          chunks.add(SessionChunk(isFocus: false, minutes: 10));
-        }
+        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 10));
       }
       chunks.add(SessionChunk(isFocus: false, minutes: 10));
     } else if (totalMins <= 120) {
@@ -141,9 +226,7 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 52 ? 52 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) {
-          chunks.add(SessionChunk(isFocus: false, minutes: 17));
-        }
+        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 17));
       }
       chunks.add(SessionChunk(isFocus: false, minutes: 17));
     } else {
@@ -153,9 +236,7 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 90 ? 90 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) {
-          chunks.add(SessionChunk(isFocus: false, minutes: 20));
-        }
+        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 20));
       }
       chunks.add(SessionChunk(isFocus: false, minutes: 20));
     }
@@ -187,6 +268,16 @@ class _FocusScreenState extends State<FocusScreen>
       _secondsLeft = totalSecs;
       _totalSeconds = totalSecs;
     });
+
+    FocusTimerService.startTimer(
+      durationSeconds: totalSecs,
+      phase: 'focusing',
+      sessionMins: _sessionMinutes,
+      breakMins: _breakMinutes,
+      currentChunkIndex: 0,
+      chunks: _chunks.map((c) => c.toMap()).toList(),
+    );
+
     _startUiTimer();
   }
 
@@ -221,13 +312,23 @@ class _FocusScreenState extends State<FocusScreen>
 
     _currentChunkIndex = nextIndex;
     final nextChunk = _chunks[_currentChunkIndex];
+    final nextSecs = nextChunk.minutes * 60;
 
     setState(() {
       nextChunk.isActive = true;
       _phase = nextChunk.isFocus ? FocusPhase.focusing : FocusPhase.onBreak;
-      _secondsLeft = nextChunk.minutes * 60;
-      _totalSeconds = _secondsLeft;
+      _secondsLeft = nextSecs;
+      _totalSeconds = nextSecs;
     });
+
+    FocusTimerService.startTimer(
+      durationSeconds: nextSecs,
+      phase: nextChunk.isFocus ? 'focusing' : 'onBreak',
+      sessionMins: _sessionMinutes,
+      breakMins: _breakMinutes,
+      currentChunkIndex: _currentChunkIndex,
+      chunks: _chunks.map((c) => c.toMap()).toList(),
+    );
 
     if (!nextChunk.isFocus) {
       NotificationService.showImmediateNotification(
@@ -265,19 +366,30 @@ class _FocusScreenState extends State<FocusScreen>
 
     _currentChunkIndex = nextIndex;
     final nextChunk = _chunks[_currentChunkIndex];
+    final nextSecs = nextChunk.minutes * 60;
 
     setState(() {
       nextChunk.isActive = true;
       _phase = nextChunk.isFocus ? FocusPhase.focusing : FocusPhase.onBreak;
-      _secondsLeft = nextChunk.minutes * 60;
-      _totalSeconds = _secondsLeft;
+      _secondsLeft = nextSecs;
+      _totalSeconds = nextSecs;
     });
+
+    FocusTimerService.startTimer(
+      durationSeconds: nextSecs,
+      phase: nextChunk.isFocus ? 'focusing' : 'onBreak',
+      sessionMins: _sessionMinutes,
+      breakMins: _breakMinutes,
+      currentChunkIndex: _currentChunkIndex,
+      chunks: _chunks.map((c) => c.toMap()).toList(),
+    );
 
     _startUiTimer();
   }
 
   void _finishSession({required bool skippedBreak}) {
     _uiTimer?.cancel();
+    FocusTimerService.stopTimer();
     HapticFeedback.heavyImpact();
 
     final totalFocusMinutes = _chunks
@@ -306,6 +418,7 @@ class _FocusScreenState extends State<FocusScreen>
 
   void _reset() {
     _uiTimer?.cancel();
+    FocusTimerService.stopTimer();
     setState(() {
       _phase = FocusPhase.idle;
       _secondsLeft = 0;
@@ -318,8 +431,17 @@ class _FocusScreenState extends State<FocusScreen>
   void _pauseResume() {
     if (_uiTimer?.isActive == true) {
       _uiTimer?.cancel();
+      FocusTimerService.stopTimer();
       setState(() {});
     } else {
+      FocusTimerService.startTimer(
+        durationSeconds: _secondsLeft,
+        phase: _phase == FocusPhase.focusing ? 'focusing' : 'onBreak',
+        sessionMins: _sessionMinutes,
+        breakMins: _breakMinutes,
+        currentChunkIndex: _currentChunkIndex,
+        chunks: _chunks.map((c) => c.toMap()).toList(),
+      );
       _startUiTimer();
       setState(() {});
     }
@@ -399,7 +521,10 @@ class _FocusScreenState extends State<FocusScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _uiTimer?.cancel();
+    _bgTimerSub?.cancel();
+    _bgChunkSub?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -552,8 +677,7 @@ class _FocusScreenState extends State<FocusScreen>
         children: [
           Row(
             children: [
-              const Icon(Icons.timeline_rounded,
-                  size: 16, color: Color(0xFF6366F1)),
+              const Icon(Icons.timeline_rounded, size: 16, color: Color(0xFF6366F1)),
               const SizedBox(width: 6),
               Text(
                 _techniqueLabel.isNotEmpty ? _techniqueLabel : 'Session Plan',
@@ -577,30 +701,25 @@ class _FocusScreenState extends State<FocusScreen>
               children: List.generate(_chunks.length * 2 - 1, (i) {
                 if (i.isOdd) {
                   final chunkIndex = i ~/ 2;
-                  final isCompleted = chunkIndex < _chunks.length &&
-                      _chunks[chunkIndex].isCompleted;
+                  final isCompleted =
+                      chunkIndex < _chunks.length && _chunks[chunkIndex].isCompleted;
                   return Container(
                     width: 20,
                     height: 2,
-                    color: isCompleted
-                        ? const Color(0xFF6366F1)
-                        : Colors.grey.shade200,
+                    color: isCompleted ? const Color(0xFF6366F1) : Colors.grey.shade200,
                   );
                 }
                 final chunkIndex = i ~/ 2;
-                final chunk = _chunks[chunkIndex];
-                return _buildTimelineDot(chunk, chunkIndex);
+                return _buildTimelineDot(_chunks[chunkIndex], chunkIndex);
               }),
             ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _timelineLegend(
-                  const Color(0xFF6366F1), Icons.bolt_rounded, 'Focus'),
+              _timelineLegend(const Color(0xFF6366F1), Icons.bolt_rounded, 'Focus'),
               const SizedBox(width: 16),
-              _timelineLegend(
-                  const Color(0xFF10B981), Icons.coffee_rounded, 'Break'),
+              _timelineLegend(const Color(0xFF10B981), Icons.coffee_rounded, 'Break'),
               const SizedBox(width: 16),
               _timelineLegend(Colors.grey.shade300, Icons.circle, 'Upcoming'),
             ],
@@ -630,18 +749,11 @@ class _FocusScreenState extends State<FocusScreen>
           width: isActive ? 40 : 32,
           height: isActive ? 40 : 32,
           decoration: BoxDecoration(
-            color:
-            isCompleted || isActive ? dotColor : dotColor.withOpacity(0.3),
+            color: isCompleted || isActive ? dotColor : dotColor.withOpacity(0.3),
             shape: BoxShape.circle,
             border: isActive ? Border.all(color: dotColor, width: 2) : null,
             boxShadow: isActive
-                ? [
-              BoxShadow(
-                color: dotColor.withOpacity(0.4),
-                blurRadius: 8,
-                spreadRadius: 2,
-              )
-            ]
+                ? [BoxShadow(color: dotColor.withOpacity(0.4), blurRadius: 8, spreadRadius: 2)]
                 : [],
           ),
           child: Center(
@@ -652,9 +764,7 @@ class _FocusScreenState extends State<FocusScreen>
                   ? Icons.bolt_rounded
                   : Icons.coffee_rounded,
               size: isActive ? 20 : 16,
-              color: isCompleted || isActive
-                  ? Colors.white
-                  : Colors.grey.shade500,
+              color: isCompleted || isActive ? Colors.white : Colors.grey.shade500,
             ),
           ),
         ),
@@ -686,8 +796,7 @@ class _FocusScreenState extends State<FocusScreen>
       Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 10, color: color),
         const SizedBox(width: 4),
-        Text(label,
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
       ]);
 
   Widget _buildSetupCard() {
@@ -709,23 +818,19 @@ class _FocusScreenState extends State<FocusScreen>
               value: hours,
               onIncrement: () => _onSessionChanged(_sessionMinutes + 60),
               onDecrement: () {
-                if (_sessionMinutes - 60 >= 5)
-                  _onSessionChanged(_sessionMinutes - 60);
+                if (_sessionMinutes - 60 >= 5) _onSessionChanged(_sessionMinutes - 60);
               },
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Text(':',
-                  style:
-                  TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+              child: Text(':', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
             ),
             _buildTimeUnit(
               label: 'MM',
               value: minutes,
               onIncrement: () => _onSessionChanged(_sessionMinutes + 5),
               onDecrement: () {
-                if (_sessionMinutes - 5 >= 5)
-                  _onSessionChanged(_sessionMinutes - 5);
+                if (_sessionMinutes - 5 >= 5) _onSessionChanged(_sessionMinutes - 5);
               },
             ),
           ]),
@@ -737,15 +842,12 @@ class _FocusScreenState extends State<FocusScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.auto_awesome_rounded,
-                  size: 14, color: Color(0xFF6366F1)),
+              const Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFF6366F1)),
               const SizedBox(width: 6),
               Text(
                 _techniqueLabel,
                 style: const TextStyle(
-                    color: Color(0xFF6366F1),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12),
+                    color: Color(0xFF6366F1), fontWeight: FontWeight.w600, fontSize: 12),
               ),
             ]),
           ),
@@ -767,10 +869,8 @@ class _FocusScreenState extends State<FocusScreen>
           color: const Color(0xFF6366F1),
         ),
         Text(value.toString().padLeft(2, '0'),
-            style:
-            const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-        Text(label,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
+        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
         IconButton(
           onPressed: onDecrement,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
@@ -811,8 +911,7 @@ class _FocusScreenState extends State<FocusScreen>
       Icon(Icons.pause_circle_outline, color: Colors.orange, size: 18),
       SizedBox(width: 6),
       Text('Paused',
-          style: TextStyle(
-              color: Colors.orange, fontWeight: FontWeight.w600)),
+          style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)),
     ]),
   );
 
@@ -821,15 +920,12 @@ class _FocusScreenState extends State<FocusScreen>
       return ElevatedButton.icon(
         onPressed: _startFocus,
         icon: const Icon(Icons.play_arrow),
-        label: Text(_phase == FocusPhase.finished
-            ? 'Start New Session'
-            : 'Start Focus Session'),
+        label: Text(_phase == FocusPhase.finished ? 'Start New Session' : 'Start Focus Session'),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF6366F1),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
       );
     }
@@ -842,8 +938,7 @@ class _FocusScreenState extends State<FocusScreen>
         style: ElevatedButton.styleFrom(
           backgroundColor: _phaseColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
       ),
       const SizedBox(width: 12),
@@ -855,8 +950,7 @@ class _FocusScreenState extends State<FocusScreen>
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFF10B981),
             side: const BorderSide(color: Color(0xFF10B981)),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           ),
         ),
       const SizedBox(width: 12),
@@ -880,23 +974,19 @@ class _FocusScreenState extends State<FocusScreen>
             '${record.completedAt.hour.toString().padLeft(2, '0')}:${record.completedAt.minute.toString().padLeft(2, '0')}';
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
-              child:
-              const Icon(Icons.timer, color: Color(0xFF6366F1)),
+              child: const Icon(Icons.timer, color: Color(0xFF6366F1)),
             ),
             title: Text('${record.sessionMinutes} min focused'),
             subtitle: Text(record.skippedBreak
                 ? 'Break skipped · $time'
                 : 'Break: ${record.breakMinutes} min · $time'),
             trailing: record.skippedBreak
-                ? const Icon(Icons.skip_next,
-                color: Colors.orange, size: 18)
-                : const Icon(Icons.check_circle,
-                color: Colors.green, size: 18),
+                ? const Icon(Icons.skip_next, color: Colors.orange, size: 18)
+                : const Icon(Icons.check_circle, color: Colors.green, size: 18),
           ),
         );
       }),
@@ -909,8 +999,7 @@ class _CircleTimerPainter extends CustomPainter {
   final Color color;
   final bool isPaused;
 
-  _CircleTimerPainter(
-      {required this.progress, required this.color, this.isPaused = false});
+  _CircleTimerPainter({required this.progress, required this.color, this.isPaused = false});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -940,7 +1029,5 @@ class _CircleTimerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CircleTimerPainter old) =>
-      old.progress != progress ||
-          old.color != color ||
-          old.isPaused != isPaused;
+      old.progress != progress || old.color != color || old.isPaused != isPaused;
 }
