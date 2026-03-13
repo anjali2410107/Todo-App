@@ -41,6 +41,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         priority: event.priority,
         dueDate: event.dueDate,
         startDate: event.startDate,
+        taskTypeId: event.taskTypeId,
       );
       await repository.addTodo(todo);
       if (todo.dueDate != null) {
@@ -69,9 +70,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
 
     on<ToggleTodo>((event, emit) async {
       await repository.toggleTodo(event.todo);
-
       final isBeingCompleted = !event.todo.isCompleted;
-
       if (isBeingCompleted) {
         await NotificationService.cancelTaskReminders(event.todo.id);
         await NotificationService.cancelStartReminder(event.todo.id);
@@ -93,7 +92,6 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
           );
         }
       }
-
       emit(TodoLoaded(repository.getTodos()));
     });
 

@@ -4,13 +4,6 @@ enum TaskPriority {
   low,
 }
 
-enum TaskFilter {
-  all,
-  overdue,
-  completed,
-  highPriority,
-}
-
 class TodoModel {
   final String id;
   final String title;
@@ -52,28 +45,9 @@ class TodoModel {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: map['dueDate'] != null ? DateTime.parse(map['dueDate']) : null,
-      startDate: map['startDate'] != null ? DateTime.parse(map['startDate']) : null,
+      startDate:
+      map['startDate'] != null ? DateTime.parse(map['startDate']) : null,
       taskTypeId: map['taskTypeId'],
-    );
-  }
-
-  TodoModel copyWith({
-    String? id,
-    String? title,
-    bool? isCompleted,
-    TaskPriority? priority,
-    DateTime? dueDate,
-    DateTime? startDate,
-    String? taskTypeId,
-  }) {
-    return TodoModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      isCompleted: isCompleted ?? this.isCompleted,
-      priority: priority ?? this.priority,
-      dueDate: dueDate ?? this.dueDate,
-      startDate: startDate ?? this.startDate,
-      taskTypeId: taskTypeId ?? this.taskTypeId,
     );
   }
 }
