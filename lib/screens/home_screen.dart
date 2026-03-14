@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoappp/core/theme/app_colors.dart';
 import 'package:todoappp/enum.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/model/task_type.dart';
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: InputDecoration(
                           hintText: 'Task title',
                           filled: true,
-                          fillColor: Colors.grey.shade100,
+                          fillColor: AppColors.inputFill(context),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -158,12 +159,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               horizontal: 16, vertical: 14),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text('Task Type',
                           style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade600)),
+                              color: AppColors.greyText(context))),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 76,
@@ -197,15 +198,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Icon(type.icon,
                                         color: selected
-                                            ? Colors.white
+                                            ? AppColors.card(context)
                                             : type.color,
                                         size: 20),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: 4),
                                     Text(type.name,
                                         style: TextStyle(
                                             fontSize: 10,
                                             color: selected
-                                                ? Colors.white
+                                                ? AppColors.card(context)
                                                 : type.color,
                                             fontWeight: selected
                                                 ? FontWeight.bold
@@ -242,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Icon(getPriorityIcon(priority),
                                         color: isSelected
-                                            ? Colors.white
+                                            ? AppColors.card(context)
                                             : color,
                                         size: 18),
                                     const SizedBox(height: 2),
@@ -252,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                         color: isSelected
-                                            ? Colors.white
+                                            ? AppColors.card(context)
                                             : color,
                                       ),
                                     ),
@@ -291,16 +292,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: AppColors.greyLight(context),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
                               Icon(Icons.calendar_today_rounded,
-                                  size: 16, color: Colors.grey.shade600),
+                                  size: 16, color: AppColors.greyText(context)),
                               const SizedBox(width: 8),
                               Text(
                                 editDueDate == null
@@ -308,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : '${editDueDate!.day}/${editDueDate!.month}/${editDueDate!.year}  ${editDueDate!.hour.toString().padLeft(2, '0')}:${editDueDate!.minute.toString().padLeft(2, '0')}',
                                 style: TextStyle(
                                   color: editDueDate == null
-                                      ? Colors.grey.shade500
+                                      ? AppColors.greyText(context)
                                       : Colors.black87,
                                   fontSize: 13,
                                 ),
@@ -359,8 +360,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1),
-                                foregroundColor: Colors.white,
+                                backgroundColor: Color(0xFF6366F1),
+                                foregroundColor: AppColors.card(context),
                                 padding:
                                 const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
@@ -418,8 +419,8 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_) => StatefulBuilder(
         builder: (ctx, setSheetState) {
           return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: AppColors.card(context),
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             padding: const EdgeInsets.all(20),
@@ -431,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     width: 40, height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: AppColors.greyBorder(context),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -439,10 +440,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('Filter Tasks',
+                    Text('Filter Tasks',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E1B4B))),
+                            color: AppColors.title(context))),
                     const Spacer(),
                     if (_hasActiveFilters)
                       TextButton(
@@ -458,12 +459,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Text('Status',
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade500,
+                        color: AppColors.greyText(context),
                         letterSpacing: 0.5)),
                 const SizedBox(height: 10),
                 Wrap(
@@ -489,40 +490,40 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                             horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF6366F1)
-                              : Colors.grey.shade100,
+                              ? Color(0xFF6366F1)
+                              : AppColors.greyLight(context),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           Icon(icons[filter],
                               size: 14,
                               color: isSelected
-                                  ? Colors.white
-                                  : Colors.grey.shade600),
+                                  ? AppColors.card(context)
+                                  : AppColors.greyText(context)),
                           const SizedBox(width: 6),
                           Text(labels[filter]!,
                               style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? Colors.white
-                                      : Colors.grey.shade700)),
+                                      ? AppColors.card(context)
+                                      : AppColors.greyText(context))),
                         ]),
                       ),
                     );
                   }).toList(),
                 ),
                 if (visibleTypes.isNotEmpty) ...[
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   Text('Task Type',
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade500,
+                          color: AppColors.greyText(context),
                           letterSpacing: 0.5)),
                   const SizedBox(height: 10),
                   Wrap(
@@ -534,13 +535,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           setSheetState(() {});
                         },
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
+                          duration: Duration(milliseconds: 200),
+                          padding: EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
                             color: selectedTypeId == null
-                                ? const Color(0xFF1E1B4B)
-                                : Colors.grey.shade100,
+                                ? AppColors.title(context)
+                                : AppColors.greyLight(context),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('All Types',
@@ -548,8 +549,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: selectedTypeId == null
-                                      ? Colors.white
-                                      : Colors.grey.shade700)),
+                                      ? AppColors.card(context)
+                                      : AppColors.greyText(context))),
                         ),
                       ),
                       ...visibleTypes.map((type) {
@@ -562,12 +563,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? type.color
-                                  : Colors.grey.shade100,
+                                  : AppColors.greyLight(context),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -576,7 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Icon(type.icon,
                                     size: 14,
                                     color: isSelected
-                                        ? Colors.white
+                                        ? AppColors.card(context)
                                         : type.color),
                                 const SizedBox(width: 6),
                                 Text(type.name,
@@ -584,8 +585,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                         color: isSelected
-                                            ? Colors.white
-                                            : Colors.grey.shade700)),
+                                            ? AppColors.card(context)
+                                            : AppColors.greyText(context))),
                               ],
                             ),
                           ),
@@ -600,8 +601,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFF6366F1),
+                      foregroundColor: AppColors.card(context),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
@@ -623,9 +624,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FF),
+        backgroundColor: AppColors.scaffold(context),
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,16 +635,16 @@ class _HomeScreenState extends State<HomeScreen> {
               _getGreeting(),
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade500,
+                color: AppColors.greyText(context),
                 fontWeight: FontWeight.w400,
               ),
             ),
-            const Text(
+            Text(
               'My Tasks',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E1B4B),
+                color: AppColors.title(context),
               ),
             ),
           ],
@@ -657,16 +658,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Stack(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: _hasActiveFilters
-                            ? const Color(0xFF6366F1)
-                            : const Color(0xFF6366F1).withOpacity(0.1),
+                            ? Color(0xFF6366F1)
+                            : AppColors.iconBg(context, Color(0xFF6366F1)),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(Icons.tune_rounded,
                           color: _hasActiveFilters
-                              ? Colors.white
+                              ? AppColors.card(context)
                               : const Color(0xFF6366F1),
                           size: 20),
                     ),
@@ -788,8 +789,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddTaskSheet,
-        backgroundColor: const Color(0xFF6366F1),
-        foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF6366F1),
+        foregroundColor: AppColors.card(context),
         elevation: 4,
         icon: const Icon(Icons.add_rounded),
         label: const Text('Add Task',
@@ -800,9 +801,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMiniStat(String label, String value, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withOpacity(AppColors.isDark(context) ? 0.15 : 0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -844,9 +845,9 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: 20),
         child:
-        const Icon(Icons.delete_rounded, color: Colors.white, size: 24),
+        Icon(Icons.delete_rounded, color: AppColors.card(context), size: 24),
       ),
       onDismissed: (_) {
         context.read<TodoBloc>().add(DeleteTodo(todo.id));
@@ -854,9 +855,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: GestureDetector(
         onTap: () => _showEditDialog(todo),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
+          margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: todo.isCompleted ? Colors.grey.shade50 : Colors.white,
+            color: todo.isCompleted ? AppColors.completedCard(context) : AppColors.card(context),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -873,7 +874,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 4,
                   decoration: BoxDecoration(
                     color: todo.isCompleted
-                        ? Colors.grey.shade300
+                        ? AppColors.greyBorder(context)
                         : priorityColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
@@ -889,11 +890,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: todo.isCompleted,
                       onChanged: (_) =>
                           context.read<TodoBloc>().add(ToggleTodo(todo)),
-                      activeColor: const Color(0xFF6366F1),
+                      activeColor: Color(0xFF6366F1),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5)),
                       side: BorderSide(
-                          color: Colors.grey.shade300, width: 1.5),
+                          color: AppColors.greyBorder(context), width: 1.5),
                     ),
                   ),
                 ),
@@ -909,12 +910,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: todo.isCompleted
-                                ? Colors.grey.shade400
-                                : const Color(0xFF1E1B4B),
+                                ? AppColors.completedText(context)
+                                : AppColors.title(context),
                             decoration: todo.isCompleted
                                 ? TextDecoration.lineThrough
                                 : null,
-                            decorationColor: Colors.grey.shade400,
+                            decorationColor: AppColors.completedText(context),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -966,9 +967,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(right: 12),
+                  padding: EdgeInsets.only(right: 12),
                   child: Icon(Icons.chevron_right_rounded,
-                      color: Colors.grey.shade300, size: 20),
+                      color: AppColors.greyBorder(context), size: 20),
                 ),
               ],
             ),
@@ -1015,15 +1016,15 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Icon(Icons.task_alt_rounded,
                 size: 48, color: Color(0xFF6366F1)),
           ),
-          const SizedBox(height: 16),
-          const Text('No tasks here!',
+          SizedBox(height: 16),
+          Text('No tasks here!',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E1B4B))),
-          const SizedBox(height: 6),
+                  color: AppColors.title(context))),
+          SizedBox(height: 6),
           Text('Tap the button below to add a task',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+              style: TextStyle(fontSize: 13, color: AppColors.greyText(context))),
         ],
       ),
     );
@@ -1109,8 +1110,8 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         maxHeight: MediaQuery.of(context).size.height * 0.92,
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppColors.card(context),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SingleChildScrollView(
@@ -1129,17 +1130,17 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.greyBorder(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text('New Task',
+              SizedBox(height: 16),
+              Text('New Task',
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E1B4B))),
+                      color: AppColors.title(context))),
               const SizedBox(height: 16),
               TextField(
                 controller: _controller,
@@ -1147,7 +1148,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                 decoration: InputDecoration(
                   hintText: 'What needs to be done?',
                   filled: true,
-                  fillColor: const Color(0xFFF8F9FF),
+                  fillColor: AppColors.inputFill(context),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
@@ -1156,12 +1157,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                       horizontal: 16, vertical: 16),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text('Task Type',
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600)),
+                      color: AppColors.greyText(context))),
               const SizedBox(height: 8),
               SizedBox(
                 height: 80,
@@ -1218,12 +1219,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text('Priority',
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600)),
+                      color: AppColors.greyText(context))),
               const SizedBox(height: 8),
               Row(
                 children: TaskPriority.values.map((priority) {
@@ -1321,8 +1322,8 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFF6366F1),
+                    foregroundColor: AppColors.card(context),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -1343,22 +1344,22 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     return GestureDetector(
       onTap: _showAddCustomTypeSheet,
       child: Container(
-        margin: const EdgeInsets.only(right: 8),
+        margin: EdgeInsets.only(right: 8),
         padding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: AppColors.inputFill(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          border: Border.all(color: AppColors.greyBorder(context), width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_rounded, color: Colors.grey.shade500, size: 22),
-            const SizedBox(height: 4),
+            Icon(Icons.add_rounded, color: AppColors.greyText(context), size: 22),
+            SizedBox(height: 4),
             Text('Custom',
                 style: TextStyle(
-                    fontSize: 11, color: Colors.grey.shade500)),
+                    fontSize: 11, color: AppColors.greyText(context))),
           ],
         ),
       ),
@@ -1375,11 +1376,11 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: date != null
               ? color.withOpacity(0.08)
-              : const Color(0xFFF8F9FF),
+              : AppColors.inputFill(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color:
@@ -1393,7 +1394,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               children: [
                 Icon(icon,
                     size: 14,
-                    color: date != null ? color : Colors.grey.shade400),
+                    color: date != null ? color : AppColors.completedText(context)),
                 const SizedBox(width: 4),
                 Text(label,
                     style: TextStyle(
@@ -1401,7 +1402,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                         fontWeight: FontWeight.w600,
                         color: date != null
                             ? color
-                            : Colors.grey.shade500)),
+                            : AppColors.greyText(context))),
                 const Spacer(),
                 if (date != null)
                   GestureDetector(
@@ -1411,12 +1412,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               date == null ? 'Not set' : _formatDate(date),
               style: TextStyle(
                 fontSize: 11,
-                color: date != null ? color : Colors.grey.shade400,
+                color: date != null ? color : AppColors.completedText(context),
                 fontWeight:
                 date != null ? FontWeight.w500 : FontWeight.w400,
               ),
@@ -1498,8 +1499,8 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
         maxHeight: MediaQuery.of(context).size.height * 0.92,
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppColors.card(context),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SingleChildScrollView(
@@ -1515,7 +1516,7 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: AppColors.greyBorder(context),
                         borderRadius: BorderRadius.circular(2))),
               ),
               const SizedBox(height: 16),
@@ -1558,18 +1559,18 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                 decoration: InputDecoration(
                   hintText: 'Type name (e.g. Gym, Hobby)',
                   filled: true,
-                  fillColor: const Color(0xFFF8F9FF),
+                  fillColor: AppColors.inputFill(context),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text('Pick an Icon',
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Colors.grey.shade600)),
+                      color: AppColors.greyText(context))),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 10,
@@ -1598,12 +1599,12 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text('Pick a Color',
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Colors.grey.shade600)),
+                      color: AppColors.greyText(context))),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 10,
@@ -1620,7 +1621,7 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                         shape: BoxShape.circle,
                         border: Border.all(
                             color: selected
-                                ? Colors.white
+                                ? AppColors.card(context)
                                 : Colors.transparent,
                             width: 3),
                         boxShadow: selected
@@ -1633,8 +1634,8 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                             : [],
                       ),
                       child: selected
-                          ? const Icon(Icons.check,
-                          color: Colors.white, size: 18)
+                          ? Icon(Icons.check,
+                          color: AppColors.card(context), size: 18)
                           : null,
                     ),
                   );
@@ -1647,7 +1648,7 @@ class _AddCustomTypeSheetState extends State<_AddCustomTypeSheet> {
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _selectedColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.card(context),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:todoappp/core/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -609,12 +610,12 @@ class _FocusScreenState extends State<FocusScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.inputFill(context),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FF),
+        backgroundColor: AppColors.inputFill(context),
         elevation: 0,
-        title: const Text('Focus Timer',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E1B4B))),
+        title: Text('Focus Timer',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.title(context))),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -656,11 +657,11 @@ class _FocusScreenState extends State<FocusScreen>
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Break complete!',
+            Text('Break complete!',
                 style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF59E0B))),
-            const SizedBox(height: 2),
+            SizedBox(height: 2),
             Text('Tap "Start Focus" when you\'re ready.',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                style: TextStyle(fontSize: 12, color: AppColors.greyText(context))),
           ]),
         ),
       ]),
@@ -681,9 +682,9 @@ class _FocusScreenState extends State<FocusScreen>
     decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
     child: Column(children: [
       Icon(icon, color: color, size: 20),
-      const SizedBox(height: 4),
+      SizedBox(height: 4),
       Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
-      Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+      Text(label, style: TextStyle(fontSize: 10, color: AppColors.greyText(context))),
     ]),
   );
 
@@ -722,9 +723,9 @@ class _FocusScreenState extends State<FocusScreen>
               _phase != FocusPhase.waitingForUser &&
               _chunks.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: EdgeInsets.only(top: 4),
               child: Text('${_chunks[_currentChunkIndex].minutes} min chunk',
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                  style: TextStyle(fontSize: 11, color: AppColors.greyText(context))),
             ),
         ]),
       ]),
@@ -741,23 +742,23 @@ class _FocusScreenState extends State<FocusScreen>
   }
 
   Widget _buildTimeline() {
-    if (_chunks.isEmpty) return const SizedBox();
+    if (_chunks.isEmpty) return SizedBox();
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.timeline_rounded, size: 16, color: Color(0xFF6366F1)),
-          const SizedBox(width: 6),
+          Icon(Icons.timeline_rounded, size: 16, color: Color(0xFF6366F1)),
+          SizedBox(width: 6),
           Text(_techniqueLabel.isNotEmpty ? _techniqueLabel : 'Session Plan',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E1B4B))),
-          const Spacer(),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.title(context))),
+          Spacer(),
           Text('${_chunks.where((c) => c.isFocus).length} focus · ${_chunks.where((c) => !c.isFocus).length} breaks',
-              style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+              style: TextStyle(fontSize: 11, color: AppColors.greyText(context))),
         ]),
         const SizedBox(height: 16),
         SingleChildScrollView(
@@ -767,7 +768,7 @@ class _FocusScreenState extends State<FocusScreen>
               if (i.isOdd) {
                 final isCompleted = _chunks[i ~/ 2].isCompleted;
                 return Container(width: 20, height: 2,
-                    color: isCompleted ? const Color(0xFF6366F1) : Colors.grey.shade200);
+                    color: isCompleted ? Color(0xFF6366F1) : AppColors.greyBorder(context));
               }
               return _buildTimelineDot(_chunks[i ~/ 2], i ~/ 2);
             }),
@@ -775,11 +776,11 @@ class _FocusScreenState extends State<FocusScreen>
         ),
         const SizedBox(height: 12),
         Row(children: [
-          _timelineLegend(const Color(0xFF6366F1), Icons.bolt_rounded, 'Focus'),
-          const SizedBox(width: 16),
-          _timelineLegend(const Color(0xFF10B981), Icons.coffee_rounded, 'Break'),
-          const SizedBox(width: 16),
-          _timelineLegend(Colors.grey.shade300, Icons.circle, 'Upcoming'),
+          _timelineLegend(Color(0xFF6366F1), Icons.bolt_rounded, 'Focus'),
+          SizedBox(width: 16),
+          _timelineLegend(Color(0xFF10B981), Icons.coffee_rounded, 'Break'),
+          SizedBox(width: 16),
+          _timelineLegend(AppColors.greyBorder(context), Icons.circle, 'Upcoming'),
         ]),
       ]),
     );
@@ -790,8 +791,8 @@ class _FocusScreenState extends State<FocusScreen>
     final isCompleted = chunk.isCompleted;
     final isFocus     = chunk.isFocus;
     Color dotColor    = (isCompleted || isActive)
-        ? (isFocus ? const Color(0xFF6366F1) : const Color(0xFF10B981))
-        : Colors.grey.shade300;
+        ? (isFocus ? Color(0xFF6366F1) : const Color(0xFF10B981))
+        : AppColors.greyBorder(context);
 
     if (isActive && _phase == FocusPhase.waitingForUser) {
       dotColor = const Color(0xFFF59E0B);
@@ -818,15 +819,15 @@ class _FocusScreenState extends State<FocusScreen>
                 ? Icons.bolt_rounded
                 : Icons.coffee_rounded,
             size: isActive ? 20 : 16,
-            color: isCompleted || isActive ? Colors.white : Colors.grey.shade500,
+            color: isCompleted || isActive ? Colors.white : AppColors.greyText(context),
           ),
         ),
       ),
-      const SizedBox(height: 4),
+      SizedBox(height: 4),
       Text('${chunk.minutes}m',
           style: TextStyle(
               fontSize: 10,
-              color: isActive ? dotColor : Colors.grey.shade500,
+              color: isActive ? dotColor : AppColors.greyText(context),
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
     ]);
 
@@ -843,8 +844,8 @@ class _FocusScreenState extends State<FocusScreen>
   Widget _timelineLegend(Color color, IconData icon, String label) =>
       Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 10, color: color),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+        SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 10, color: AppColors.greyText(context))),
       ]);
 
   Widget _buildSetupCard() {
@@ -891,10 +892,10 @@ class _FocusScreenState extends State<FocusScreen>
     required VoidCallback onIncrement, required VoidCallback onDecrement,
   }) => Column(children: [
     IconButton(onPressed: onIncrement,
-        icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 32), color: const Color(0xFF6366F1)),
+        icon: Icon(Icons.keyboard_arrow_up_rounded, size: 32), color: const Color(0xFF6366F1)),
     Text(value.toString().padLeft(2, '0'),
-        style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-    Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+        style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
+    Text(label, style: TextStyle(fontSize: 11, color: AppColors.greyText(context))),
     IconButton(onPressed: onDecrement,
         icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32), color: const Color(0xFF6366F1)),
   ]);
@@ -934,10 +935,10 @@ class _FocusScreenState extends State<FocusScreen>
     if (_phase == FocusPhase.idle || _phase == FocusPhase.finished) {
       return ElevatedButton.icon(
         onPressed: _startFocus,
-        icon: const Icon(Icons.play_arrow),
+        icon: Icon(Icons.play_arrow),
         label: Text(_phase == FocusPhase.finished ? 'Start New Session' : 'Start Focus Session'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF6366F1), foregroundColor: AppColors.card(context),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
@@ -948,10 +949,10 @@ class _FocusScreenState extends State<FocusScreen>
       return Column(children: [
         ElevatedButton.icon(
           onPressed: _resumeFocusAfterBreak,
-          icon: const Icon(Icons.bolt_rounded),
-          label: const Text('Start Focus'),
+          icon: Icon(Icons.bolt_rounded),
+          label: Text('Start Focus'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white,
+            backgroundColor: Color(0xFF6366F1), foregroundColor: AppColors.card(context),
             padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           ),
@@ -972,7 +973,7 @@ class _FocusScreenState extends State<FocusScreen>
         icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
         label: Text(_isPaused ? 'Resume' : 'Pause'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _phaseColor, foregroundColor: Colors.white,
+          backgroundColor: _phaseColor, foregroundColor: AppColors.card(context),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
       ),

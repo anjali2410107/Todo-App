@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todoappp/core/theme/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:todoappp/model/todo_model.dart';
@@ -45,10 +46,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return todos.any((t) => t.dueDate != null && _isSameDate(t.dueDate!, day));
   }
 
-  Color _getPriorityColor(TaskPriority priority)
-  {
-    switch (priority)
-    {
+  Color _getPriorityColor(TaskPriority priority) {
+    switch (priority) {
       case TaskPriority.high:
         return const Color(0xFFEF4444);
       case TaskPriority.medium:
@@ -74,12 +73,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildTaskCard(TodoModel todo, {required bool isStarting}) {
     final priorityColor = _getPriorityColor(todo.priority);
-    final accentColor = isStarting ? const Color(0xFF10B981) : const Color(0xFF6366F1);
+    final accentColor = isStarting ? Color(0xFF10B981) : const Color(0xFF6366F1);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -115,8 +114,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: todo.isCompleted
-                            ? Colors.grey.shade400
-                            : const Color(0xFF1E1B4B),
+                            ? AppColors.completedText(context)
+                            : AppColors.title(context),
                         decoration: todo.isCompleted
                             ? TextDecoration.lineThrough
                             : null,
@@ -235,10 +234,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
             const SizedBox(width: 10),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E1B4B),
+                color: AppColors.title(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -263,19 +262,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
         if (tasks.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card(context),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade100, width: 1.5),
+              border: Border.all(color: AppColors.greyLight(context), width: 1.5),
             ),
             child: Row(
               children: [
-                Icon(Icons.inbox_rounded, color: Colors.grey.shade300, size: 20),
-                const SizedBox(width: 10),
+                Icon(Icons.inbox_rounded, color: AppColors.greyBorder(context), size: 20),
+                SizedBox(width: 10),
                 Text(
                   'No tasks ${isStarting ? 'starting' : 'due'} today',
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                  style: TextStyle(color: AppColors.completedText(context), fontSize: 13),
                 ),
               ],
             ),
@@ -306,16 +305,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.inputFill(context),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FF),
+        backgroundColor: AppColors.inputFill(context),
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Schedule',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E1B4B),
+            color: AppColors.title(context),
           ),
         ),
       ),
@@ -328,9 +327,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           return Column(
             children: [
               Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                margin: EdgeInsets.fromLTRB(16, 0, 16, 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.card(context),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -396,12 +395,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       color: const Color(0xFF6366F1).withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    todayTextStyle: const TextStyle(
+                    todayTextStyle: TextStyle(
                       color: Color(0xFF6366F1),
                       fontWeight: FontWeight.bold,
                     ),
-                    selectedTextStyle: const TextStyle(
-                      color: Colors.white,
+                    selectedTextStyle: TextStyle(
+                      color: AppColors.card(context),
                       fontWeight: FontWeight.bold,
                     ),
                     weekendTextStyle: const TextStyle(
@@ -412,10 +411,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
-                    titleTextStyle: const TextStyle(
+                    titleTextStyle: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E1B4B),
+                      color: AppColors.title(context),
                     ),
                     leftChevronIcon: Container(
                       padding: const EdgeInsets.all(6),
@@ -475,18 +474,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       child: Text(
                         _getSelectedDateLabel(),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.card(context),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Text(
                       '${startingTasks.length + dueTasks.length} task${startingTasks.length + dueTasks.length != 1 ? 's' : ''}',
                       style: TextStyle(
-                          color: Colors.grey.shade500, fontSize: 13),
+                          color: AppColors.greyText(context), fontSize: 13),
                     ),
                   ],
                 ),
@@ -520,9 +519,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4),
         Text(label,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+            style: TextStyle(fontSize: 11, color: AppColors.greyText(context))),
       ],
     );
   }
