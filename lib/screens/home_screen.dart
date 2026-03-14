@@ -6,6 +6,7 @@ import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/model/task_type.dart';
 import 'package:todoappp/repository/task_type_repository.dart';
 import 'package:todoappp/screens/stats_screen.dart';
+import 'package:todoappp/screens/task_detail_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -853,7 +854,15 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<TodoBloc>().add(DeleteTodo(todo.id));
       },
       child: GestureDetector(
-        onTap: () => _showEditDialog(todo),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<TodoBloc>(),
+              child: TaskDetailScreen(todo: todo),
+            ),
+          ),
+        ).then((_) => context.read<TodoBloc>().add(LoadTodos())),
         child: Container(
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
@@ -961,6 +970,35 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
+                        ],
+                        if (todo.totalSubtasks > 0) ...[
+                          const SizedBox(height: 8),
+                          Row(children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: todo.subtaskProgress,
+                                  minHeight: 4,
+                                  backgroundColor: AppColors.greyLight(context),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    todo.subtaskProgress == 1.0
+                                        ? AppColors.success
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${todo.completedSubtasks}/${todo.totalSubtasks}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.greyText(context),
+                              ),
+                            ),
+                          ]),
                         ],
                       ],
                     ),
