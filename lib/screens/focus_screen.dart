@@ -83,6 +83,9 @@ class _FocusScreenState extends State<FocusScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   int _sessionMinutes = 52;
   int _breakMinutes   = 17;
+  int? _customBreakMinutes;
+  late TextEditingController _sessionController;
+  late TextEditingController _breakController;
 
   FocusPhase _phase         = FocusPhase.idle;
   int _secondsLeft          = 0;
@@ -108,6 +111,8 @@ class _FocusScreenState extends State<FocusScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _sessionController = TextEditingController(text: _sessionMinutes.toString());
+    _breakController   = TextEditingController(text: 'Auto');
     _loadHistory();
     _pickQuote();
     _buildChunks();
@@ -234,19 +239,21 @@ class _FocusScreenState extends State<FocusScreen>
 
   List<SessionChunk> _calculateChunks(int totalMins) {
     List<SessionChunk> chunks = [];
+    // use custom break if user set one, otherwise use technique default
+    final customBreak = _customBreakMinutes;
 
     if (totalMins <= 30) {
       _techniqueLabel = 'Single Focus';
       chunks.add(SessionChunk(isFocus: true, minutes: totalMins));
-      chunks.add(SessionChunk(isFocus: false, minutes: 5));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 5));
     } else if (totalMins <= 60) {
       _techniqueLabel = 'Pomodoro Extended';
       final half      = totalMins ~/ 2;
       final remainder = totalMins - half;
       chunks.add(SessionChunk(isFocus: true, minutes: half));
-      chunks.add(SessionChunk(isFocus: false, minutes: 5));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 5));
       chunks.add(SessionChunk(isFocus: true, minutes: remainder));
-      chunks.add(SessionChunk(isFocus: false, minutes: 5));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 5));
     } else if (totalMins <= 90) {
       _techniqueLabel = '45/10 Rule';
       int remaining = totalMins;
@@ -254,9 +261,10 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 45 ? 45 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 10));
+        if (remaining > 0)
+          chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 10));
       }
-      chunks.add(SessionChunk(isFocus: false, minutes: 10));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 10));
     } else if (totalMins <= 120) {
       _techniqueLabel = '52/17 Rule';
       int remaining = totalMins;
@@ -264,9 +272,10 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 52 ? 52 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 17));
+        if (remaining > 0)
+          chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 17));
       }
-      chunks.add(SessionChunk(isFocus: false, minutes: 17));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 17));
     } else {
       _techniqueLabel = 'Ultradian Rhythm';
       int remaining = totalMins;
@@ -274,9 +283,10 @@ class _FocusScreenState extends State<FocusScreen>
         final focus = remaining >= 90 ? 90 : remaining;
         chunks.add(SessionChunk(isFocus: true, minutes: focus));
         remaining -= focus;
-        if (remaining > 0) chunks.add(SessionChunk(isFocus: false, minutes: 20));
+        if (remaining > 0)
+          chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 20));
       }
-      chunks.add(SessionChunk(isFocus: false, minutes: 20));
+      chunks.add(SessionChunk(isFocus: false, minutes: customBreak ?? 20));
     }
 
     return chunks;
@@ -319,6 +329,7 @@ class _FocusScreenState extends State<FocusScreen>
     _startUiTimer();
   }
 
+  // User taps "Start Focus" after break ends
   void _resumeFocusAfterBreak() {
     if (_currentChunkIndex >= _chunks.length) return;
 
@@ -375,6 +386,7 @@ class _FocusScreenState extends State<FocusScreen>
     final nextChunk   = _chunks[nextIndex];
     final nextIsFocus = nextChunk.isFocus;
 
+    // Focus ended → auto-start break
     if (!nextIsFocus) {
       _currentChunkIndex = nextIndex;
       final nextSecs     = nextChunk.minutes * 60;
@@ -404,6 +416,7 @@ class _FocusScreenState extends State<FocusScreen>
       _startUiTimer();
     }
 
+    // Break ended → wait for user
     else {
       _currentChunkIndex = nextIndex;
       setState(() {
@@ -439,6 +452,7 @@ class _FocusScreenState extends State<FocusScreen>
     final nextIsFocus     = nextChunk.isFocus;
 
     if (nextIsFocus) {
+      // Go straight to waiting for user (skip break = user decides when to start)
       setState(() {
         nextChunk.isActive = true;
         _phase             = FocusPhase.waitingForUser;
@@ -498,11 +512,13 @@ class _FocusScreenState extends State<FocusScreen>
     _uiTimer?.cancel();
     FocusTimerService.stopTimer();
     setState(() {
-      _phase             = FocusPhase.idle;
-      _secondsLeft       = 0;
-      _totalSeconds      = 0;
-      _currentChunkIndex = 0;
+      _phase              = FocusPhase.idle;
+      _secondsLeft        = 0;
+      _totalSeconds       = 0;
+      _currentChunkIndex  = 0;
+      _customBreakMinutes = null;
     });
+    _breakController.text = 'Auto';
     _buildChunks();
   }
 
@@ -551,6 +567,7 @@ class _FocusScreenState extends State<FocusScreen>
 
   void _onSessionChanged(int mins) {
     setState(() => _sessionMinutes = mins);
+    _sessionController.text = mins.toString();
     _buildChunks();
   }
 
@@ -604,6 +621,8 @@ class _FocusScreenState extends State<FocusScreen>
     _bgFinishedSub?.cancel();
     _bgWaitingSub?.cancel();
     _pulseController.dispose();
+    _sessionController.dispose();
+    _breakController.dispose();
     super.dispose();
   }
 
@@ -853,37 +872,169 @@ class _FocusScreenState extends State<FocusScreen>
     final minutes = _sessionMinutes % 60;
     return Card(
       elevation: 2,
+      color: AppColors.card(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(children: [
-          const Text('Session Duration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          // ── Session Duration ──
+          Text('Session Duration',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: AppColors.title(context))),
           const SizedBox(height: 16),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            _buildTimeUnit(label: 'HH', value: hours,
-                onIncrement: () => _onSessionChanged(_sessionMinutes + 60),
-                onDecrement: () { if (_sessionMinutes - 60 >= 5) _onSessionChanged(_sessionMinutes - 60); }),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(':', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold))),
-            _buildTimeUnit(label: 'MM', value: minutes,
-                onIncrement: () => _onSessionChanged(_sessionMinutes + 5),
-                onDecrement: () { if (_sessionMinutes - 5 >= 5) _onSessionChanged(_sessionMinutes - 5); }),
+            _buildTimeUnit(
+              label: 'HH',
+              value: hours,
+              onIncrement: () => _onSessionChanged(_sessionMinutes + 60),
+              onDecrement: () {
+                if (_sessionMinutes - 60 >= 1) _onSessionChanged(_sessionMinutes - 60);
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(':',
+                  style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.title(context))),
+            ),
+            _buildTimeUnit(
+              label: 'MM',
+              value: minutes,
+              onIncrement: () => _onSessionChanged(_sessionMinutes + 1),
+              onDecrement: () {
+                if (_sessionMinutes - 1 >= 1) _onSessionChanged(_sessionMinutes - 1);
+              },
+            ),
+          ]),
+          const SizedBox(height: 12),
+
+          // ── Manual input row ──
+          Row(children: [
+            Expanded(
+              child: _buildManualInput(
+                label: 'Session (mins)',
+                icon: Icons.timer_rounded,
+                color: const Color(0xFF6366F1),
+                controller: _sessionController,
+                onSubmitted: (val) {
+                  final parsed = int.tryParse(val);
+                  if (parsed != null && parsed >= 1 && parsed <= 480) {
+                    _onSessionChanged(parsed);
+                  } else {
+                    // reset to current valid value
+                    _sessionController.text = _sessionMinutes.toString();
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildManualInput(
+                label: 'Break (mins)',
+                icon: Icons.coffee_rounded,
+                color: const Color(0xFF10B981),
+                controller: _breakController,
+                onSubmitted: (val) {
+                  final parsed = int.tryParse(val);
+                  if (parsed != null && parsed >= 1 && parsed <= 60) {
+                    setState(() => _customBreakMinutes = parsed);
+                    _breakController.text = parsed.toString();
+                    _buildChunks();
+                  } else {
+                    setState(() => _customBreakMinutes = null);
+                    _breakController.text = 'Auto';
+                    _buildChunks();
+                  }
+                },
+              ),
+            ),
           ]),
           const SizedBox(height: 16),
+
+          // ── Technique label ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
                 color: const Color(0xFF6366F1).withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20)),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFF6366F1)),
+              const Icon(Icons.auto_awesome_rounded,
+                  size: 14, color: Color(0xFF6366F1)),
               const SizedBox(width: 6),
-              Text(_techniqueLabel,
-                  style: const TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.w600, fontSize: 12)),
+              Text(
+                _customBreakMinutes != null
+                    ? '$_techniqueLabel · Custom Break'
+                    : _techniqueLabel,
+                style: const TextStyle(
+                    color: Color(0xFF6366F1),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12),
+              ),
             ]),
           ),
         ]),
       ),
+    );
+  }
+
+  Widget _buildManualInput({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required TextEditingController controller,
+    required ValueChanged<String> onSubmitted,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(AppColors.isDark(context) ? 0.15 : 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 10,
+                  color: color,
+                  fontWeight: FontWeight.w600)),
+        ]),
+        const SizedBox(height: 4),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.title(context)),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            filled: false,
+            hintText: label.contains('Break') ? 'Auto' : '0',
+            hintStyle: TextStyle(
+                fontSize: 18,
+                color: AppColors.greyText(context),
+                fontWeight: FontWeight.bold),
+          ),
+          onSubmitted: (val) {
+            onSubmitted(val);
+            FocusScope.of(context).unfocus();
+          },
+          onEditingComplete: () {
+            onSubmitted(controller.text);
+            FocusScope.of(context).unfocus();
+          },
+        ),
+      ]),
     );
   }
 
@@ -932,6 +1083,7 @@ class _FocusScreenState extends State<FocusScreen>
   );
 
   Widget _buildControls() {
+    // Idle or finished
     if (_phase == FocusPhase.idle || _phase == FocusPhase.finished) {
       return ElevatedButton.icon(
         onPressed: _startFocus,
@@ -945,6 +1097,7 @@ class _FocusScreenState extends State<FocusScreen>
       );
     }
 
+    // Waiting for user after break
     if (_phase == FocusPhase.waitingForUser) {
       return Column(children: [
         ElevatedButton.icon(
@@ -967,6 +1120,7 @@ class _FocusScreenState extends State<FocusScreen>
       ]);
     }
 
+    // Active timer
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       ElevatedButton.icon(
         onPressed: _pauseResume,

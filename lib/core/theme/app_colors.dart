@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
+class AppColors
+{
   static const primary    = Color(0xFF6366F1);
   static const success    = Color(0xFF10B981);
   static const warning    = Color(0xFFF59E0B);
