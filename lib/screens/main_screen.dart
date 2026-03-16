@@ -13,13 +13,27 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CalendarScreen(),
-    const FocusScreen(),
-    const SettingsScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      const HomeScreen(),
+      const CalendarScreen(),
+      const FocusScreen(),
+      SettingsScreen(key: _settingsKey),
+    ];
+  }
+
+  void _onTabTapped(int index) {
+    setState(() => _currentIndex = index);
+    if (index == 3) {
+      _settingsKey.currentState?.reloadStreak();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(

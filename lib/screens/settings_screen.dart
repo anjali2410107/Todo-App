@@ -8,19 +8,19 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  SettingsScreenState createState() => SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class SettingsScreenState extends State<SettingsScreen> {
   StreakData? _streakData;
 
   @override
   void initState() {
     super.initState();
-    _loadStreak();
+    reloadStreak();
   }
 
-  Future<void> _loadStreak() async {
+  Future<void> reloadStreak() async {
     final data = await StreakService.getStreakData();
     if (mounted) setState(() => _streakData = data);
   }
@@ -50,19 +50,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionLabel('Appearance', subColor),
           _buildCard(
             child: _buildToggleTile(
-              icon: isDark
-                  ? Icons.dark_mode_rounded
-                  : Icons.light_mode_rounded,
-              iconColor: isDark
-                  ? const Color(0xFF8B5CF6)
-                  : const Color(0xFFF59E0B),
+              icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              iconColor: isDark ? const Color(0xFF8B5CF6) : const Color(0xFFF59E0B),
               title: 'Dark Mode',
               subtitle: isDark ? 'Dark theme is on' : 'Light theme is on',
               textColor: textColor,
               subColor: subColor,
               value: isDark,
-              onChanged: (_) =>
-                  context.read<ThemeProvider>().toggleTheme(),
+              onChanged: (_) => context.read<ThemeProvider>().toggleTheme(),
             ),
           ),
           const SizedBox(height: 24),
@@ -96,7 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildStreakCard() {
     final streak = _streakData!;
     final isActive = streak.currentStreak > 0;
-    final color = isActive ? const Color(0xFFF59E0B) : AppColors.greyText(context);
+    final color = isActive
+        ? const Color(0xFFF59E0B)
+        : AppColors.greyText(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -121,7 +118,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Row(children: [
             Text(streak.streakEmoji,
@@ -129,46 +127,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(width: 14),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isActive
-                        ? '${streak.currentStreak} Day Streak!'
-                        : 'No Active Streak',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isActive
-                            ? Colors.white
-                            : AppColors.greyText(context)),
-                  ),
-                  Text(
-                    streak.streakMessage,
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: isActive
-                            ? Colors.white.withOpacity(0.85)
-                            : AppColors.greyText(context)),
-                  ),
-                ],
-              ),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isActive
+                          ? '${streak.currentStreak} Day Streak!'
+                          : 'No Active Streak',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isActive
+                              ? Colors.white
+                              : AppColors.greyText(context)),
+                    ),
+                    Text(
+                      streak.streakMessage,
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: isActive
+                              ? Colors.white.withOpacity(0.85)
+                              : AppColors.greyText(context)),
+                    ),
+                  ]),
             ),
           ]),
         ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(children: [
-            _buildStreakStat(
-                '${streak.bestStreak}',
-                'Best Streak',
-                Icons.emoji_events_rounded,
-                const Color(0xFFF59E0B)),
+            _buildStreakStat('${streak.bestStreak}', 'Best Streak',
+                Icons.emoji_events_rounded, const Color(0xFFF59E0B)),
             _verticalDivider(),
-            _buildStreakStat(
-                '${streak.totalCompleted}',
-                'Total Done',
-                Icons.check_circle_rounded,
-                AppColors.success),
+            _buildStreakStat('${streak.totalCompleted}', 'Total Done',
+                Icons.check_circle_rounded, AppColors.success),
             _verticalDivider(),
             _buildStreakStat(
                 streak.lastActiveDate != null
@@ -195,19 +186,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 15,
                 color: AppColors.title(context))),
         Text(label,
-            style: TextStyle(fontSize: 10, color: AppColors.greyText(context))),
+            style:
+            TextStyle(fontSize: 10, color: AppColors.greyText(context))),
       ]),
     );
   }
 
   Widget _verticalDivider() => Container(
-    width: 1, height: 40,
+    width: 1,
+    height: 40,
     color: AppColors.divider(context),
     margin: const EdgeInsets.symmetric(horizontal: 8),
   );
 
-  String _formatDate(DateTime d) =>
-      '${d.day}/${d.month}/${d.year}';
+  String _formatDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
   Widget _buildSectionLabel(String label, Color color) => Padding(
     padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -257,15 +249,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: textColor)),
-              Text(subtitle,
-                  style: TextStyle(fontSize: 12, color: subColor)),
-            ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: textColor)),
+                  Text(subtitle,
+                      style: TextStyle(fontSize: 12, color: subColor)),
+                ]),
           ),
           Switch(
             value: value,
