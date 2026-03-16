@@ -28,6 +28,7 @@ class TodoRepository {
       dueDate: todo.dueDate,
       startDate: todo.startDate,
       taskTypeId: todo.taskTypeId,
+      subtasks: todo.subtasks, // preserve subtasks
     );
     await box.put(todo.id, updated.toMap());
   }

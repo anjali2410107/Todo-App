@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:todoappp/core/services/streak_services.dart';
 import 'package:todoappp/model/todo_model.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -71,10 +72,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<ToggleTodo>((event, emit) async {
       await repository.toggleTodo(event.todo);
       final isBeingCompleted = !event.todo.isCompleted;
+
       if (isBeingCompleted) {
+        await StreakService.onTaskCompleted();
         await NotificationService.cancelTaskReminders(event.todo.id);
         await NotificationService.cancelStartReminder(event.todo.id);
       } else {
+        await StreakService.onTaskUncompleted();
         if (event.todo.dueDate != null &&
             event.todo.dueDate!.isAfter(DateTime.now())) {
           await NotificationService.scheduleTaskReminders(

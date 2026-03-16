@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoappp/core/services/streak_services.dart';
 import 'package:todoappp/core/theme/app_colors.dart';
 import 'package:todoappp/enum.dart';
 import 'package:todoappp/model/todo_model.dart';
@@ -17,11 +18,19 @@ class _HomeScreenState extends State<HomeScreen> {
   TaskFilter selectedFilter = TaskFilter.all;
   String? selectedTypeId;
   List<TaskType> _allTaskTypes = [];
+  StreakData? _streakData;
+
   @override
   void initState() {
     super.initState();
     context.read<TodoBloc>().add(LoadTodos());
     _loadTaskTypes();
+    _loadStreak();
+  }
+
+  Future<void> _loadStreak() async {
+    final data = await StreakService.getStreakData();
+    if (mounted) setState(() => _streakData = data);
   }
   Future<void> _loadTaskTypes() async {
     final types = await TaskTypeRepository.getAllTypes();
@@ -721,18 +730,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     !t.isCompleted &&
                     t.dueDate!.isBefore(now))
                     .length;
+                WidgetsBinding.instance.addPostFrameCallback((_) => _loadStreak());
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Row(
+                  child: Column(
                     children: [
-                      _buildMiniStat(
-                          'Total', total.toString(), const Color(0xFF6366F1)),
-                      const SizedBox(width: 8),
-                      _buildMiniStat(
-                          'Done', completed.toString(), const Color(0xFF10B981)),
-                      const SizedBox(width: 8),
-                      _buildMiniStat('Overdue', overdue.toString(),
-                          const Color(0xFFEF4444)),
+                      Row(
+                        children: [
+                          _buildMiniStat(
+                              'Total', total.toString(), const Color(0xFF6366F1)),
+                          const SizedBox(width: 8),
+                          _buildMiniStat(
+                              'Done', completed.toString(), const Color(0xFF10B981)),
+                          const SizedBox(width: 8),
+                          _buildMiniStat('Overdue', overdue.toString(),
+                              const Color(0xFFEF4444)),
+                        ],
+                      ),
+                      if (_streakData != null) ...[
+                        const SizedBox(height: 8),
+                        _buildStreakBar(),
+                      ],
                     ],
                   ),
                 );
@@ -829,6 +847,71 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildStreakBar() {
+    final streak = _streakData!;
+    final isActive = streak.currentStreak > 0;
+    final color = isActive ? const Color(0xFFF59E0B) : AppColors.greyText(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isActive
+            ? const Color(0xFFF59E0B).withOpacity(AppColors.isDark(context) ? 0.2 : 0.1)
+            : AppColors.greyLight(context),
+        borderRadius: BorderRadius.circular(12),
+        border: isActive
+            ? Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3))
+            : null,
+      ),
+      child: Row(
+        children: [
+          Text(streak.streakEmoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isActive
+                      ? '${streak.currentStreak} day streak!'
+                      : 'No active streak',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: color),
+                ),
+                Text(
+                  streak.streakMessage,
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: color.withOpacity(0.8)),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Best: ${streak.bestStreak}',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: color),
+              ),
+              Text(
+                '${streak.totalCompleted} done',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: color.withOpacity(0.7)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTaskCard(TodoModel todo) {
     final now = DateTime.now();
     final isOverdue = todo.dueDate != null &&
