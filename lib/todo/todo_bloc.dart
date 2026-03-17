@@ -62,6 +62,26 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       emit(TodoLoaded(repository.getTodos()));
     });
 
+    // Undo delete — restores exact todo as it was
+    on<AddTodoModel>((event, emit) async {
+      await repository.addTodo(event.todo);
+      if (event.todo.dueDate != null) {
+        await NotificationService.scheduleTaskReminders(
+          taskId: event.todo.id,
+          title: event.todo.title,
+          dueDate: event.todo.dueDate!,
+        );
+      }
+      if (event.todo.startDate != null) {
+        await NotificationService.scheduleStartReminder(
+          taskId: event.todo.id,
+          title: event.todo.title,
+          startDate: event.todo.startDate!,
+        );
+      }
+      emit(TodoLoaded(repository.getTodos()));
+    });
+
     on<DeleteTodo>((event, emit) async {
       await repository.deleteTodo(event.id);
       await NotificationService.cancelTaskReminders(event.id);

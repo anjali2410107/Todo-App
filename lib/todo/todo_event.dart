@@ -10,9 +10,13 @@ class AddTodo extends TodoEvent {
   final DateTime? dueDate;
   final DateTime? startDate;
   final String? taskTypeId;
+  AddTodo(this.title, this.priority, this.dueDate, this.startDate, {this.taskTypeId});
+}
 
-  AddTodo(this.title, this.priority, this.dueDate, this.startDate,
-      {this.taskTypeId});
+// Used for undo delete — restores full TodoModel as-is
+class AddTodoModel extends TodoEvent {
+  final TodoModel todo;
+  AddTodoModel(this.todo);
 }
 
 class DeleteTodo extends TodoEvent {

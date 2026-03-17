@@ -127,6 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: SafeArea(
           child: Stack(
             children: [
+              // background circles
               Positioned(
                 top: -60,
                 right: -60,
@@ -164,10 +165,12 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
+              // main content
               Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // logo
                     AnimatedBuilder(
                       animation: _logoController,
                       builder: (_, __) => Opacity(
@@ -199,6 +202,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: 32),
 
+                    // app name + tagline
                     AnimatedBuilder(
                       animation: _textController,
                       builder: (_, __) => Opacity(
@@ -236,6 +240,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
+              // bottom loader
               Positioned(
                 bottom: 48,
                 left: 0,
