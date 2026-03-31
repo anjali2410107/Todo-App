@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todoappp/screens/login_screen.dart';
 import 'package:todoappp/screens/main_screen.dart';
 import 'package:todoappp/screens/onboarding_screen.dart';
 
@@ -84,14 +86,26 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigate() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
+    final user = FirebaseAuth.instance.currentUser;
 
     if (!mounted) return;
+
+    Widget destination;
+    if (user != null) {
+      // Already logged in — go straight to the app
+      destination = const MainScreen();
+    } else if (!onboardingDone) {
+      // First-time user — show onboarding first
+      destination = const OnboardingScreen();
+    } else {
+      // Returning user, not logged in — show login
+      destination = const LoginScreen();
+    }
 
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) =>
-        onboardingDone ? const MainScreen() : const OnboardingScreen(),
+        pageBuilder: (_, __, ___) => destination,
         transitionsBuilder: (_, animation, __, child) => FadeTransition(
           opacity: animation,
           child: child,

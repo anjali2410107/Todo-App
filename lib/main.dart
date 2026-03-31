@@ -8,9 +8,16 @@ import 'package:todoappp/screens/splash_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
 import 'core/services/focus_background_service.dart';
 import 'core/services/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:todoappp/auth/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await AuthService.initializeGoogleSignIn();
   await initializeBackgroundService();
   await Hive.initFlutter();
   await Hive.openBox('todos');
