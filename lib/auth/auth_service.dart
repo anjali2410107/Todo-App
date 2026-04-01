@@ -20,7 +20,7 @@ class AuthService {
     try {
       final GoogleSignInAccount? gUser =
           await GoogleSignIn.instance.authenticate();
-      if (gUser == null) return null; // user cancelled
+      if (gUser == null) return null;
 
       final GoogleSignInAuthentication gAuth = gUser.authentication;
       final credential = GoogleAuthProvider.credential(

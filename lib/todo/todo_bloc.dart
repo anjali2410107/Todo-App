@@ -1,37 +1,78 @@
+import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:todoappp/core/services/streak_services.dart';
 import 'package:todoappp/model/todo_model.dart';
+import 'package:todoappp/repository/firestore_todo_repository.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:todoappp/core/services/notification_service.dart';
+
 part 'todo_event.dart';
 part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
-  final TodoRepository repository;
+  final TodoRepository hiveRepository;
+  final FirestoreTodoRepository firestoreRepository;
   final Uuid uuid = Uuid();
+  StreamSubscription? _todosSubscription;
+  
+  final Map<String, int> _notificationCache = {};
 
-  TodoBloc(this.repository) : super(TodoInitial()) {
+  TodoBloc({required this.hiveRepository, required this.firestoreRepository})
+      : super(TodoInitial()) {
     on<LoadTodos>((event, emit) async {
-      final todos = repository.getTodos();
+      final localTodos = hiveRepository.getTodos();
+      emit(TodoLoaded(localTodos));
+
+      try {
+        final remoteTodos = await firestoreRepository.getTodos();
+        if (remoteTodos.isEmpty && localTodos.isNotEmpty) {
+          await firestoreRepository.migrateTodos(localTodos);
+        }
+
+        await _todosSubscription?.cancel();
+        _todosSubscription = firestoreRepository
+            .getTodosStream()
+            .debounceTime(const Duration(milliseconds: 300))
+            .listen((todos) {
+          add(_UpdateTodosFromFirestore(todos));
+        });
+      } catch (e) {
+        print("Firestore sync error: $e");
+      }
+    });
+
+    on<_UpdateTodosFromFirestore>((event, emit) async {
+      final todos = event.todos;
+      
       for (final todo in todos) {
+        final taskHash = Object.hash(todo.title, todo.dueDate, todo.startDate, todo.isCompleted);
+        
+        if (_notificationCache[todo.id] == taskHash) continue;
+        _notificationCache[todo.id] = taskHash;
+
         if (!todo.isCompleted) {
-          if (todo.dueDate != null) {
+          if (todo.dueDate != null && todo.dueDate!.isAfter(DateTime.now())) {
             await NotificationService.scheduleTaskReminders(
               taskId: todo.id,
               title: todo.title,
               dueDate: todo.dueDate!,
             );
           }
-          if (todo.startDate != null) {
+          if (todo.startDate != null && todo.startDate!.isAfter(DateTime.now())) {
             await NotificationService.scheduleStartReminder(
               taskId: todo.id,
               title: todo.title,
               startDate: todo.startDate!,
             );
           }
+        } else {
+          await NotificationService.cancelTaskReminders(todo.id);
+          await NotificationService.cancelStartReminder(todo.id);
         }
       }
+      
       emit(TodoLoaded(todos));
     });
 
@@ -44,100 +85,43 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         startDate: event.startDate,
         taskTypeId: event.taskTypeId,
       );
-      await repository.addTodo(todo);
-      if (todo.dueDate != null) {
-        await NotificationService.scheduleTaskReminders(
-          taskId: todo.id,
-          title: todo.title,
-          dueDate: todo.dueDate!,
-        );
-      }
-      if (todo.startDate != null) {
-        await NotificationService.scheduleStartReminder(
-          taskId: todo.id,
-          title: todo.title,
-          startDate: todo.startDate!,
-        );
-      }
-      emit(TodoLoaded(repository.getTodos()));
+      await firestoreRepository.addTodo(todo);
     });
 
-    // Undo delete — restores exact todo as it was
     on<AddTodoModel>((event, emit) async {
-      await repository.addTodo(event.todo);
-      if (event.todo.dueDate != null) {
-        await NotificationService.scheduleTaskReminders(
-          taskId: event.todo.id,
-          title: event.todo.title,
-          dueDate: event.todo.dueDate!,
-        );
-      }
-      if (event.todo.startDate != null) {
-        await NotificationService.scheduleStartReminder(
-          taskId: event.todo.id,
-          title: event.todo.title,
-          startDate: event.todo.startDate!,
-        );
-      }
-      emit(TodoLoaded(repository.getTodos()));
+      await firestoreRepository.addTodo(event.todo);
     });
 
     on<DeleteTodo>((event, emit) async {
-      await repository.deleteTodo(event.id);
+      _notificationCache.remove(event.id);
+      await firestoreRepository.deleteTodo(event.id);
       await NotificationService.cancelTaskReminders(event.id);
       await NotificationService.cancelStartReminder(event.id);
-      emit(TodoLoaded(repository.getTodos()));
     });
 
     on<ToggleTodo>((event, emit) async {
-      await repository.toggleTodo(event.todo);
-      final isBeingCompleted = !event.todo.isCompleted;
-
-      if (isBeingCompleted) {
+      final isCompletion = !event.todo.isCompleted;
+      if (isCompletion) {
         await StreakService.onTaskCompleted();
-        await NotificationService.cancelTaskReminders(event.todo.id);
-        await NotificationService.cancelStartReminder(event.todo.id);
       } else {
         await StreakService.onTaskUncompleted();
-        if (event.todo.dueDate != null &&
-            event.todo.dueDate!.isAfter(DateTime.now())) {
-          await NotificationService.scheduleTaskReminders(
-            taskId: event.todo.id,
-            title: event.todo.title,
-            dueDate: event.todo.dueDate!,
-          );
-        }
-        if (event.todo.startDate != null &&
-            event.todo.startDate!.isAfter(DateTime.now())) {
-          await NotificationService.scheduleStartReminder(
-            taskId: event.todo.id,
-            title: event.todo.title,
-            startDate: event.todo.startDate!,
-          );
-        }
       }
-      emit(TodoLoaded(repository.getTodos()));
+      await firestoreRepository.toggleTodo(event.todo);
     });
 
     on<UpdateTodoEvent>((event, emit) async {
-      await NotificationService.cancelTaskReminders(event.updatedTodo.id);
-      await NotificationService.cancelStartReminder(event.updatedTodo.id);
-      await repository.updateTodo(event.updatedTodo);
-      if (event.updatedTodo.dueDate != null) {
-        await NotificationService.scheduleTaskReminders(
-          taskId: event.updatedTodo.id,
-          title: event.updatedTodo.title,
-          dueDate: event.updatedTodo.dueDate!,
-        );
-      }
-      if (event.updatedTodo.startDate != null) {
-        await NotificationService.scheduleStartReminder(
-          taskId: event.updatedTodo.id,
-          title: event.updatedTodo.title,
-          startDate: event.updatedTodo.startDate!,
-        );
-      }
-      emit(TodoLoaded(repository.getTodos()));
+      await firestoreRepository.updateTodo(event.updatedTodo);
     });
   }
+
+  @override
+  Future<void> close() {
+    _todosSubscription?.cancel();
+    return super.close();
+  }
+}
+
+class _UpdateTodosFromFirestore extends TodoEvent {
+  final List<TodoModel> todos;
+  _UpdateTodosFromFirestore(this.todos);
 }

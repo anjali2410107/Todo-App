@@ -6,11 +6,12 @@ import 'package:todoappp/core/theme/theme_provider.dart';
 import 'package:todoappp/repository/todo_repository.dart';
 import 'package:todoappp/screens/splash_screen.dart';
 import 'package:todoappp/todo/todo_bloc.dart';
+import 'auth/auth_service.dart';
 import 'core/services/focus_background_service.dart';
 import 'core/services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:todoappp/auth/auth_service.dart';
+import 'package:todoappp/repository/firestore_todo_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,13 +25,17 @@ void main() async {
   await NotificationService.init();
 
   final isDarkMode = await ThemeProvider.getSavedTheme();
-  final repository = TodoRepository();
+  final hiveRepository = TodoRepository();
+  final firestoreRepository = FirestoreTodoRepository();
 
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(isDarkMode),
       child: BlocProvider(
-        create: (_) => TodoBloc(repository),
+        create: (_) => TodoBloc(
+          hiveRepository: hiveRepository,
+          firestoreRepository: firestoreRepository,
+        ),
         child: const MyApp(),
       ),
     ),

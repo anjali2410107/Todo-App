@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:todoappp/model/subtask_model.dart';
 
 enum TaskPriority {
@@ -39,23 +39,30 @@ class TodoModel {
       'title': title,
       'isCompleted': isCompleted,
       'priority': priority.name,
-      'dueDate': dueDate?.toIso8601String(),
-      'startDate': startDate?.toIso8601String(),
+      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate!) : null,
+      'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
       'taskTypeId': taskTypeId,
-      'subtasks': jsonEncode(subtasks.map((s) => s.toMap()).toList()),
+      'subtasks': subtasks.map((s) => s.toMap()).toList(),
     };
   }
 
   factory TodoModel.fromMap(Map<String, dynamic> map) {
     List<SubTask> subtasks = [];
     if (map['subtasks'] != null) {
-      try {
-        final decoded = jsonDecode(map['subtasks'] as String);
-        subtasks = (decoded as List)
+      if (map['subtasks'] is List) {
+        subtasks = (map['subtasks'] as List)
             .map((s) => SubTask.fromMap(Map<String, dynamic>.from(s)))
             .toList();
-      } catch (_) {}
+      }
     }
+
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate();
+      if (value is String) return DateTime.tryParse(value);
+      return null;
+    }
+
     return TodoModel(
       id: map['id'],
       title: map['title'],
@@ -64,9 +71,8 @@ class TodoModel {
             (e) => e.name == map['priority'],
         orElse: () => TaskPriority.medium,
       ),
-      dueDate: map['dueDate'] != null ? DateTime.parse(map['dueDate']) : null,
-      startDate:
-      map['startDate'] != null ? DateTime.parse(map['startDate']) : null,
+      dueDate: parseDate(map['dueDate']),
+      startDate: parseDate(map['startDate']),
       taskTypeId: map['taskTypeId'],
       subtasks: subtasks,
     );

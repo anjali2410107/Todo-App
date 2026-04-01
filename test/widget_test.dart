@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:provider/provider.dart';
 import 'package:todoappp/main.dart';
+import 'package:todoappp/core/theme/theme_provider.dart';
+import 'package:todoappp/todo/todo_bloc.dart';
+import 'package:todoappp/repository/todo_repository.dart';
+import 'package:todoappp/repository/firestore_todo_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockHiveRepository extends Mock implements TodoRepository {}
+class MockFirestoreRepository extends Mock implements FirestoreTodoRepository {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App starts and shows Splash Screen', (WidgetTester tester) async {
+    // 1. Setup Mocks
+    final mockHive = MockHiveRepository();
+    final mockFirestore = MockFirestoreRepository();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 2. Build the app with Providers just like in main.dart
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider(false)),
+          RepositoryProvider<TodoRepository>.value(value: mockHive),
+          RepositoryProvider<FirestoreTodoRepository>.value(value: mockFirestore),
+        ],
+        child: BlocProvider(
+          create: (_) => TodoBloc(
+            hiveRepository: mockHive,
+            firestoreRepository: mockFirestore,
+          ),
+          child: const MyApp(),
+        ),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 3. Verify Splash screen or initial elements
+    // Since SplashScreen has an animation and a timer, we use pumpAndSettle
+    await tester.pumpAndSettle();
+    
+    // Smoke check: check that MyApp is there
+    expect(find.byType(MyApp), findsOneWidget);
   });
 }

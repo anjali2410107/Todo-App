@@ -6,7 +6,7 @@ class StreakService {
   static const String _kLastCompletedDate = 'streak_last_date';
   static const String _kTotalCompleted    = 'streak_total_completed';
   static const String _kTodayCompleted    = 'streak_today_completed';
-  static const String _kPrevStreak        = 'streak_prev'; // streak before today
+  static const String _kPrevStreak        = 'streak_prev';
 
   static Future<void> onTaskCompleted() async {
     final prefs      = await SharedPreferences.getInstance();
@@ -18,12 +18,10 @@ class StreakService {
     await prefs.setInt(_kTotalCompleted, total + 1);
 
     if (lastDate == today) {
-      // streak already counted today — just bump today count
       await prefs.setInt(_kTodayCompleted, todayCount + 1);
       return;
     }
 
-    // new day — calculate new streak
     int prevStreak = prefs.getInt(_kCurrentStreak) ?? 0;
     int best       = prefs.getInt(_kBestStreak) ?? 0;
     int current;
@@ -36,14 +34,11 @@ class StreakService {
       current    = diff == 1 ? prevStreak + 1 : 1;
     }
 
-    // save prev streak so we can roll back if user uncompletes everything today
     await prefs.setInt(_kPrevStreak, prevStreak);
     await prefs.setInt(_kCurrentStreak, current);
     await prefs.setInt(_kTodayCompleted, todayCount + 1);
     await prefs.setString(_kLastCompletedDate, today);
 
-    // only update best if streak is confirmed (>1 day) OR today count stays > 0
-    // we update best here but roll it back in onTaskUncompleted if needed
     if (current > best) {
       await prefs.setInt(_kBestStreak, current);
     }
@@ -64,14 +59,12 @@ class StreakService {
     await prefs.setInt(_kTodayCompleted, newTodayCount);
 
     if (newTodayCount == 0) {
-      // all tasks uncompleted today — fully roll back today's streak
       final prevStreak = prefs.getInt(_kPrevStreak) ?? 0;
       final best       = prefs.getInt(_kBestStreak) ?? 0;
 
       await prefs.setInt(_kCurrentStreak, prevStreak);
       await prefs.remove(_kLastCompletedDate);
 
-      // roll back best streak if it was set by today's (now reversed) completion
       if (best > prevStreak) {
         await prefs.setInt(_kBestStreak, prevStreak);
       }
@@ -83,7 +76,6 @@ class StreakService {
     final lastDate = prefs.getString(_kLastCompletedDate);
     int current    = prefs.getInt(_kCurrentStreak) ?? 0;
 
-    // reset streak if missed a day
     if (lastDate != null) {
       final last = _parseDate(lastDate);
       final diff = DateTime.now().difference(last).inDays;

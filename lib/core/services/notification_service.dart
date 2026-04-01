@@ -93,14 +93,21 @@ tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
           );}}
   static Future<void> cancelTaskReminders(String taskId) async
   {
-    final offsets=[30,0];
-    for(final minutes in offsets)
-    {
-      await _notifications.cancel(
-        id:   _generateId(taskId,minutes));
-    }}
+    try {
+      final offsets=[30,0];
+      for(final minutes in offsets)
+      {
+        await _notifications.cancel(
+          id:   _generateId(taskId,minutes));
+      }
+    } catch (e) {
+      print("Notification cancel skipped: $e");
+    }
+  }
   static Future<void> cancelStartReminder(String taskId) async {
-    await _notifications.cancel(id:taskId.hashCode + 5000);
+    try {
+      await _notifications.cancel(id:taskId.hashCode + 5000);
+    } catch (_) {}
   }
 static Future<void> scheduleStartReminder
     ({
