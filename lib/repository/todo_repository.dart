@@ -36,4 +36,8 @@ class TodoRepository {
   Future<void> updateTodo(TodoModel updatedTodo) async {
     await box.put(updatedTodo.id, updatedTodo.toMap());
   }
+
+  Future<void> clearTodos() async {
+    await box.clear();
+  }
 }

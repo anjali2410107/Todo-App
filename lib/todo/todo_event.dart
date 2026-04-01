@@ -33,3 +33,5 @@ class UpdateTodoEvent extends TodoEvent {
   final TodoModel updatedTodo;
   UpdateTodoEvent({required this.updatedTodo});
 }
+
+class ClearTodos extends TodoEvent {}

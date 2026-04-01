@@ -112,6 +112,14 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<UpdateTodoEvent>((event, emit) async {
       await firestoreRepository.updateTodo(event.updatedTodo);
     });
+
+    on<ClearTodos>((event, emit) async {
+      await _todosSubscription?.cancel();
+      _todosSubscription = null;
+      await hiveRepository.clearTodos();
+      _notificationCache.clear();
+      emit(TodoInitial());
+    });
   }
 
   @override

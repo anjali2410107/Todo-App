@@ -7,6 +7,8 @@ import 'package:todoappp/core/theme/app_colors.dart';
 import 'package:todoappp/core/theme/theme_provider.dart';
 import 'package:todoappp/screens/login_screen.dart';
 
+import '../todo/todo_bloc.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -235,7 +237,9 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true && mounted) {
+      context.read<TodoBloc>().add(ClearTodos());
       await AuthService.signOut();
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
