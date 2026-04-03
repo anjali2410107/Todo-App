@@ -86,40 +86,31 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         taskTypeId: event.taskTypeId,
       );
       
-      // 1. Update local repository
       await hiveRepository.addTodo(todo);
       
-      // 2. Emit UI update immediately (optimistic)
       final currentTodos = hiveRepository.getTodos();
       emit(TodoLoaded(currentTodos));
 
-      // 3. Update Firestore in the background
       await firestoreRepository.addTodo(todo);
     });
 
     on<AddTodoModel>((event, emit) async {
-      // 1. Update local
       await hiveRepository.addTodo(event.todo);
       
-      // 2. Immediate UI update
       final currentTodos = hiveRepository.getTodos();
       emit(TodoLoaded(currentTodos));
 
-      // 3. Cloud update
       await firestoreRepository.addTodo(event.todo);
     });
 
     on<DeleteTodo>((event, emit) async {
       _notificationCache.remove(event.id);
       
-      // 1. Update local
       await hiveRepository.deleteTodo(event.id);
       
-      // 2. Immediate UI update
       final currentTodos = hiveRepository.getTodos();
       emit(TodoLoaded(currentTodos));
 
-      // 3. Cloud update
       await firestoreRepository.deleteTodo(event.id);
       await NotificationService.cancelTaskReminders(event.id);
       await NotificationService.cancelStartReminder(event.id);
@@ -128,14 +119,11 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<ToggleTodo>((event, emit) async {
       final updatedTodo = event.todo.copyWith(isCompleted: !event.todo.isCompleted);
       
-      // 1. Update local
       await hiveRepository.updateTodo(updatedTodo);
       
-      // 2. Immediate UI update
       final currentTodos = hiveRepository.getTodos();
       emit(TodoLoaded(currentTodos));
 
-      // 3. Stats & Cloud
       if (!event.todo.isCompleted) {
         await StreakService.onTaskCompleted();
       } else {
@@ -145,14 +133,11 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     });
 
     on<UpdateTodoEvent>((event, emit) async {
-      // 1. Update local
       await hiveRepository.updateTodo(event.updatedTodo);
       
-      // 2. Immediate UI update
       final currentTodos = hiveRepository.getTodos();
       emit(TodoLoaded(currentTodos));
 
-      // 3. Cloud
       await firestoreRepository.updateTodo(event.updatedTodo);
     });
 

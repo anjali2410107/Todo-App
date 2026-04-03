@@ -89,6 +89,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final titleController = TextEditingController(text: _todo.title);
     TaskPriority editPriority = _todo.priority;
     DateTime? editDueDate = _todo.dueDate;
+    DateTime? editStartDate = _todo.startDate;
 
     showDialog(
       context: context,
@@ -147,57 +148,119 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: editDueDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked == null) return;
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime: editDueDate != null
-                        ? TimeOfDay.fromDateTime(editDueDate!)
-                        : TimeOfDay.now(),
-                  );
-                  if (time != null) {
-                    setDialog(() => editDueDate = DateTime(picked.year,
-                        picked.month, picked.day, time.hour, time.minute));
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.inputFill(context),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(children: [
-                    Icon(Icons.calendar_today_rounded,
-                        size: 16, color: AppColors.greyText(context)),
-                    const SizedBox(width: 8),
-                    Text(
-                      editDueDate == null
-                          ? 'Set due date'
-                          : _formatDate(editDueDate!),
-                      style: TextStyle(
-                          color: editDueDate == null
-                              ? AppColors.greyText(context)
-                              : AppColors.title(context),
-                          fontSize: 13),
-                    ),
-                    const Spacer(),
-                    if (editDueDate != null)
-                      GestureDetector(
-                        onTap: () => setDialog(() => editDueDate = null),
-                        child: Icon(Icons.close_rounded,
-                            size: 16, color: Colors.red.shade400),
+              Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: editStartDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked == null) return;
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: editStartDate != null
+                            ? TimeOfDay.fromDateTime(editStartDate!)
+                            : TimeOfDay.now(),
+                      );
+                      if (time != null) {
+                        setDialog(() => editStartDate = DateTime(picked.year,
+                            picked.month, picked.day, time.hour, time.minute));
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.inputFill(context),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                  ]),
+                      child: Row(children: [
+                        Icon(Icons.play_circle_outline_rounded,
+                            size: 16, color: Colors.green.shade400),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            editStartDate == null
+                                ? 'Set start'
+                                : _formatDate(editStartDate!),
+                            style: TextStyle(
+                                color: editStartDate == null
+                                    ? AppColors.greyText(context)
+                                    : AppColors.title(context),
+                                fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (editStartDate != null)
+                          GestureDetector(
+                            onTap: () => setDialog(() => editStartDate = null),
+                            child: Icon(Icons.close_rounded,
+                                size: 16, color: Colors.red.shade400),
+                          ),
+                      ]),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: editDueDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked == null) return;
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: editDueDate != null
+                            ? TimeOfDay.fromDateTime(editDueDate!)
+                            : TimeOfDay.now(),
+                      );
+                      if (time != null) {
+                        setDialog(() => editDueDate = DateTime(picked.year,
+                            picked.month, picked.day, time.hour, time.minute));
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.inputFill(context),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(children: [
+                        Icon(Icons.calendar_today_rounded,
+                            size: 16, color: Colors.blue.shade400),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            editDueDate == null
+                                ? 'Set due'
+                                : _formatDate(editDueDate!),
+                            style: TextStyle(
+                                color: editDueDate == null
+                                    ? AppColors.greyText(context)
+                                    : AppColors.title(context),
+                                fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (editDueDate != null)
+                          GestureDetector(
+                            onTap: () => setDialog(() => editDueDate = null),
+                            child: Icon(Icons.close_rounded,
+                                size: 16, color: Colors.red.shade400),
+                          ),
+                      ]),
+                    ),
+                  ),
+                ),
+              ]),
             ]),
           ),
           actions: [
@@ -211,6 +274,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   title: titleController.text.trim(),
                   priority: editPriority,
                   dueDate: editDueDate,
+                  startDate: editStartDate,
                 );
                 _saveAndUpdate(updated);
                 Navigator.pop(context);

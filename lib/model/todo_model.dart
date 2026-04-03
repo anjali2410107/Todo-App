@@ -39,8 +39,8 @@ class TodoModel {
       'title': title,
       'isCompleted': isCompleted,
       'priority': priority.name,
-      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate!) : null,
-      'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
+      'dueDate': dueDate?.toIso8601String(),
+      'startDate': startDate?.toIso8601String(),
       'taskTypeId': taskTypeId,
       'subtasks': subtasks.map((s) => s.toMap()).toList(),
     };
@@ -60,12 +60,13 @@ class TodoModel {
       if (value == null) return null;
       if (value is Timestamp) return value.toDate();
       if (value is String) return DateTime.tryParse(value);
+      if (value is DateTime) return value;
       return null;
     }
 
     return TodoModel(
-      id: map['id'],
-      title: map['title'],
+      id: map['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      title: map['title']?.toString() ?? '',
       isCompleted: map['isCompleted'] ?? false,
       priority: TaskPriority.values.firstWhere(
             (e) => e.name == map['priority'],
@@ -73,7 +74,7 @@ class TodoModel {
       ),
       dueDate: parseDate(map['dueDate']),
       startDate: parseDate(map['startDate']),
-      taskTypeId: map['taskTypeId'],
+      taskTypeId: map['taskTypeId']?.toString(),
       subtasks: subtasks,
     );
   }

@@ -6,9 +6,16 @@ class TodoRepository {
 
   List<TodoModel> getTodos() {
     final data = box.values.toList();
-    return data
-        .map((e) => TodoModel.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+    final List<TodoModel> todos = [];
+    for (final e in data) {
+      try {
+        todos.add(TodoModel.fromMap(Map<String, dynamic>.from(e)));
+      } catch (err) {
+        print('Error parsing todo from Hive: $err');
+        // Skip corrupted record
+      }
+    }
+    return todos;
   }
 
   Future<void> addTodo(TodoModel todo) async {

@@ -108,7 +108,6 @@ class SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // avatar
             CircleAvatar(
               radius: 28,
               backgroundImage: user.photoURL != null

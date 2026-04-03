@@ -127,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final TextEditingController editingController = TextEditingController(text: todo.title);
     TaskPriority editPriority = todo.priority;
     DateTime? editDueDate = todo.dueDate;
+    DateTime? editStartDate = todo.startDate;
     String? editTaskTypeId = todo.taskTypeId;
     showDialog(
       context: context,
@@ -217,43 +218,91 @@ class _HomeScreenState extends State<HomeScreen> {
                         }).toList(),
                       ),
                       const SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context, useRootNavigator: true,
-                            initialDate: editDueDate ?? DateTime.now(),
-                            firstDate: DateTime(2000), lastDate: DateTime(2100),
-                          );
-                          if (picked == null) return;
-                          final pickedTime = await showTimePicker(
-                            context: context, useRootNavigator: true,
-                            initialTime: editDueDate != null ? TimeOfDay.fromDateTime(editDueDate!) : TimeOfDay.now(),
-                          );
-                          if (pickedTime != null) {
-                            setStateDialog(() {
-                              editDueDate = DateTime(picked.year, picked.month, picked.day, pickedTime.hour, pickedTime.minute);
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(color: AppColors.greyLight(context), borderRadius: BorderRadius.circular(12)),
-                          child: Row(children: [
-                            Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.greyText(context)),
-                            const SizedBox(width: 8),
-                            Text(
-                              editDueDate == null ? 'Set due date' : '${editDueDate!.day}/${editDueDate!.month}/${editDueDate!.year}  ${editDueDate!.hour.toString().padLeft(2, '0')}:${editDueDate!.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(color: editDueDate == null ? AppColors.greyText(context) : AppColors.title(context), fontSize: 13),
+                      Row(children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context, useRootNavigator: true,
+                                initialDate: editStartDate ?? DateTime.now(),
+                                firstDate: DateTime(2000), lastDate: DateTime(2100),
+                              );
+                              if (picked == null) return;
+                              final pickedTime = await showTimePicker(
+                                context: context, useRootNavigator: true,
+                                initialTime: editStartDate != null ? TimeOfDay.fromDateTime(editStartDate!) : TimeOfDay.now(),
+                              );
+                              if (pickedTime != null) {
+                                setStateDialog(() {
+                                  editStartDate = DateTime(picked.year, picked.month, picked.day, pickedTime.hour, pickedTime.minute);
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(color: AppColors.greyLight(context), borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Icon(Icons.play_circle_outline_rounded, size: 16, color: Colors.green.shade400),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    editStartDate == null ? 'Set start date' : _formatDate(editStartDate!),
+                                    style: TextStyle(color: editStartDate == null ? AppColors.greyText(context) : AppColors.title(context), fontSize: 13),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (editStartDate != null)
+                                  GestureDetector(
+                                    onTap: () => setStateDialog(() => editStartDate = null),
+                                    child: Icon(Icons.close_rounded, size: 16, color: Colors.red.shade400),
+                                  ),
+                              ]),
                             ),
-                            const Spacer(),
-                            if (editDueDate != null)
-                              GestureDetector(
-                                onTap: () => setStateDialog(() => editDueDate = null),
-                                child: Icon(Icons.close_rounded, size: 16, color: Colors.red.shade400),
-                              ),
-                          ]),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context, useRootNavigator: true,
+                                initialDate: editDueDate ?? DateTime.now(),
+                                firstDate: DateTime(2000), lastDate: DateTime(2100),
+                              );
+                              if (picked == null) return;
+                              final pickedTime = await showTimePicker(
+                                context: context, useRootNavigator: true,
+                                initialTime: editDueDate != null ? TimeOfDay.fromDateTime(editDueDate!) : TimeOfDay.now(),
+                              );
+                              if (pickedTime != null) {
+                                setStateDialog(() {
+                                  editDueDate = DateTime(picked.year, picked.month, picked.day, pickedTime.hour, pickedTime.minute);
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(color: AppColors.greyLight(context), borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Icon(Icons.calendar_today_rounded, size: 16, color: Colors.blue.shade400),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    editDueDate == null ? 'Set due date' : _formatDate(editDueDate!),
+                                    style: TextStyle(color: editDueDate == null ? AppColors.greyText(context) : AppColors.title(context), fontSize: 13),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (editDueDate != null)
+                                  GestureDetector(
+                                    onTap: () => setStateDialog(() => editDueDate = null),
+                                    child: Icon(Icons.close_rounded, size: 16, color: Colors.red.shade400),
+                                  ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                      ]),
                       const SizedBox(height: 20),
                       Row(children: [
                         Expanded(
@@ -270,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               final updatedTodo = TodoModel(
                                 id: todo.id, title: editingController.text,
                                 isCompleted: todo.isCompleted, priority: editPriority,
-                                dueDate: editDueDate, startDate: todo.startDate,
+                                dueDate: editDueDate, startDate: editStartDate,
                                 taskTypeId: editTaskTypeId, subtasks: todo.subtasks,
                               );
                               context.read<TodoBloc>().add(UpdateTodoEvent(updatedTodo: updatedTodo));
